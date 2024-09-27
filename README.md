@@ -1,4 +1,14 @@
-## Recommendation before use
+## Table of Contents
+- [Recommendation before use](#recommendation-before-use)
+- [Features](#features)
+- [Settings](#settings)
+- [Quick Start](#quick-start)
+- [Prerequisites](#prerequisites)
+- [Obtaining API Keys](#obtaining-api-keys)
+- [Installation](#installation)
+- [Support](#support-this-project)
+- [Contacts](#contacts)
+
 
 # Join the bot [here](https://t.me/notpixel/app?startapp=f6624523270)
 
@@ -27,13 +37,13 @@
 | **USE_PROXY_FROM_FILE**    | Whether to use a proxy from the bot/config/proxies.txt file (True / False)                                    |
 
 
-## Quick Start 📚
+## Quick Start
 
 To install libraries and run bot - open run.bat on Windows
 
 ## Prerequisites
 Before you begin, make sure you have the following installed:
-- [Python](https://www.python.org/downloads/) **version 3.10 - 3.11.5**
+- [Python](https://www.python.org/downloads/) **IMPORTANT**: Make sure to use **Python 3.10 - 3.11.5**. 
 
 ## Obtaining API Keys
 1. Go to my.telegram.org and log in using your phone number.
