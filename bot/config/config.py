@@ -9,7 +9,9 @@ class Settings(BaseSettings):
 
 
     REF_LINK: str = "https://t.me/notpixel/app?startapp=f6624523270"
-    AUTO_UPGRADE: bool = True
+    AUTO_UPGRADE_PAINT_REWARD: bool = True
+    AUTO_UPGRADE_RECHARGE_SPEED:bool = True
+    AUTO_UPGRADE_RECHARGE_ENERGY:bool = True
     AUTO_TASK: bool = True
 
     USE_PROXY_FROM_FILE: bool = False
