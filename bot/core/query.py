@@ -15,6 +15,18 @@ from bot.exceptions import InvalidSession
 from .headers import headers
 from random import randint
 
+import urllib3
+from requests.adapters import HTTPAdapter
+from urllib3.poolmanager import PoolManager
+import ssl
+
+class SSLAdapter(HTTPAdapter):
+    def init_poolmanager(self, *args, **kwargs):
+        context = ssl.create_default_context()
+        context.check_hostname = False
+        context.verify_mode = ssl.CERT_NONE
+        kwargs['ssl_context'] = context
+        return super().init_poolmanager(*args, **kwargs)
 
 class Tapper:
     def __init__(self, query: str, session_name):
@@ -179,6 +191,7 @@ class Tapper:
         headers["User-Agent"] = generate_random_user_agent(device_type='android', browser_type='chrome')
         http_client = CloudflareScraper(headers=headers, connector=proxy_conn)
         session = cloudscraper.create_scraper()
+        session.mount('https://', SSLAdapter())
 
         if proxy:
             proxy_check = await self.check_proxy(http_client=http_client, proxy=proxy)
