@@ -3,6 +3,7 @@ import random
 from time import time
 
 import aiohttp
+import requests
 from aiocfscrape import CloudflareScraper
 from aiohttp_proxy import ProxyConnector
 from better_proxy import Proxy
@@ -16,17 +17,8 @@ from .headers import headers
 from random import randint
 
 import urllib3
-from requests.adapters import HTTPAdapter
-from urllib3.poolmanager import PoolManager
-import ssl
 
-class SSLAdapter(HTTPAdapter):
-    def init_poolmanager(self, *args, **kwargs):
-        context = ssl.create_default_context()
-        context.check_hostname = False
-        context.verify_mode = ssl.CERT_NONE
-        kwargs['ssl_context'] = context
-        return super().init_poolmanager(*args, **kwargs)
+urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 class Tapper:
     def __init__(self, query: str, session_name):
@@ -121,8 +113,8 @@ class Tapper:
             logger.error(f"{self.session_name} | Proxy: {proxy} | Error: {error}")
             return False
 
-    def login(self, session: cloudscraper.CloudScraper):
-        response = session.get("https://notpx.app/api/v1/users/me", headers=headers)
+    def login(self, session: requests.Session):
+        response = session.get("https://notpx.app/api/v1/users/me", headers=headers, verify=False)
         if response.status_code == 200:
             logger.success(f"{self.session_name} | <green>Logged in.</green>")
             return True
@@ -131,8 +123,8 @@ class Tapper:
             logger.warning("{self.session_name} | <red>Failed to login</red>")
             return False
 
-    def get_user_data(self, session: cloudscraper.CloudScraper):
-        response = session.get("https://notpx.app/api/v1/mining/status", headers=headers)
+    def get_user_data(self, session: requests.Session):
+        response = session.get("https://notpx.app/api/v1/mining/status", headers=headers, verify=False)
         if response.status_code == 200:
             return response.json()
         else:
@@ -148,39 +140,44 @@ class Tapper:
     def generate_random_pos(self):
         return randint(1, 1000000)
 
-    def repaint(self, session: cloudscraper.CloudScraper, chance_left):
+    def repaint(self, session: requests.Session, chance_left):
         payload = {
             "newColor": str(self.generate_random_color()),
             "pixelId": int(self.generate_random_pos())
         }
-        response = session.post("https://notpx.app/api/v1/repaint/start", headers=headers, json=payload)
+        response = session.post("https://notpx.app/api/v1/repaint/start", headers=headers, json=payload, verify=False)
         if response.status_code == 200:
-            logger.success(
-                f"{self.session_name} | <green>Repaint successfully balace: <light-blue>{response.json()['balance']}</light-blue> | Repaint left: <yellow>{chance_left}</yellow></green>")
+            logger.success(f"{self.session_name} | <green>Painted successfully balace: <light-blue>{response.json()['balance']}</light-blue> | Repaint left: <yellow>{chance_left}</yellow></green>")
         else:
             logger.warning(f"{self.session_name} | Faled to repaint: {response.json()}")
+
 
     def auto_task(self, session: cloudscraper.CloudScraper):
         pass
 
-    async def auto_upgrade(self, session: cloudscraper.CloudScraper):
-        res = session.get("https://notpx.app/api/v1/mining/boost/check/paintReward", headers=headers)
+
+    async def auto_upgrade_paint(self, session: requests.Session):
+        res = session.get("https://notpx.app/api/v1/mining/boost/check/paintReward", headers=headers, verify=False)
         if res.status_code == 200:
             logger.success(f"{self.session_name} | <green>Upgrade paint reward successfully!</green>")
-        await asyncio.sleep(random.uniform(2, 4))
-        res = session.get("https://notpx.app/api/v1/mining/boost/check/reChargeSpeed", headers=headers)
+        await asyncio.sleep(random.uniform(2,4))
+
+    async def auto_upgrade_recharge_speed(self, session: requests.Session):
+        res = session.get("https://notpx.app/api/v1/mining/boost/check/reChargeSpeed", headers=headers, verify=False)
         if res.status_code == 200:
             logger.success(f"{self.session_name} | <green>Upgrade recharging speed successfully!</green>")
-        await asyncio.sleep(random.uniform(2, 4))
-        res = session.get("https://notpx.app/api/v1/mining/boost/check/energyLimit", headers=headers)
+        await asyncio.sleep(random.uniform(2,4))
+
+    async def auto_upgrade_energy_limit(self, session: requests.Session):
+        res = session.get("https://notpx.app/api/v1/mining/boost/check/energyLimit", headers=headers, verify=False)
         if res.status_code == 200:
             logger.success(f"{self.session_name} | <green>Upgrade energy limit successfully!</green>")
 
-    def claimpx(self, session: cloudscraper.CloudScraper):
-        res = session.get("https://notpx.app/api/v1/mining/claim", headers=headers)
+
+    def claimpx(self, session: requests.Session):
+        res = session.get("https://notpx.app/api/v1/mining/claim", headers=headers, verify=False)
         if res.status_code == 200:
-            logger.success(
-                f"{self.session_name} | <green>Successfully claimed <cyan>{res.json()['claimed']} px</cyan> from mining!</green>")
+            logger.success(f"{self.session_name} | <green>Successfully claimed <cyan>{res.json()['claimed']} px</cyan> from mining!</green>")
         else:
             logger.warning(f"{self.session_name} | <yellow>Failed to claim px from mining: {res.json()}</yellow>")
 
@@ -190,8 +187,7 @@ class Tapper:
 
         headers["User-Agent"] = generate_random_user_agent(device_type='android', browser_type='chrome')
         http_client = CloudflareScraper(headers=headers, connector=proxy_conn)
-        session = cloudscraper.create_scraper()
-        session.mount('https://', SSLAdapter())
+        session = requests.Session()
 
         if proxy:
             proxy_check = await self.check_proxy(http_client=http_client, proxy=proxy)
@@ -248,8 +244,12 @@ class Tapper:
                                 sleep_ = random.uniform(2, 5)
                                 logger.info(f"{self.session_name} | Sleep <cyan>{sleep_}</cyan> before continue...")
 
-                        if settings.AUTO_UPGRADE:
-                            await self.auto_upgrade(session)
+                        if settings.AUTO_UPGRADE_PAINT_REWARD:
+                            await self.auto_upgrade_paint(session)
+                        if settings.AUTO_UPGRADE_RECHARGE_ENERGY:
+                            await self.auto_upgrade_recharge_speed(session)
+                        if settings.AUTO_UPGRADE_RECHARGE_ENERGY:
+                            await self.auto_upgrade_recharge_speed(session)
 
                     else:
                         logger.warning(f"{self.session_name} | <yellow>Failed to get user data!</yellow>")
