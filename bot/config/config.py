@@ -14,6 +14,7 @@ class Settings(BaseSettings):
     AUTO_UPGRADE_RECHARGE_ENERGY:bool = True
     AUTO_TASK: bool = True
 
+    DELAY_EACH_ACCOUNT: list[int] = [10,15]
     USE_PROXY_FROM_FILE: bool = False
 
 
