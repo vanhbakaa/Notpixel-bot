@@ -1,6 +1,7 @@
 import asyncio
 import random
 import sys
+from itertools import cycle
 from time import time
 from urllib.parse import unquote
 
@@ -26,7 +27,7 @@ import urllib3
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 class Tapper:
-    def __init__(self, tg_client: Client):
+    def __init__(self, tg_client: Client, multi_thread: bool):
         self.tg_client = tg_client
         self.session_name = tg_client.name
         self.first_name = ''
@@ -39,7 +40,7 @@ class Tapper:
         self.maxtime = 0
         self.fromstart = 0
         self.checked = [False]*5
-
+        self.multi_thread = multi_thread
     async def get_tg_web_data(self, proxy: str | None) -> str:
         try:
             if settings.REF_LINK == "":
@@ -253,16 +254,19 @@ class Tapper:
                             await self.auto_upgrade_paint(session)
                         if settings.AUTO_UPGRADE_RECHARGE_ENERGY:
                             await self.auto_upgrade_recharge_speed(session)
-                        if settings.AUTO_UPGRADE_RECHARGE_SPEED:
-                            await self.auto_upgrade_energy_limit(session)
+                        if settings.AUTO_UPGRADE_RECHARGE_ENERGY:
+                            await self.auto_upgrade_recharge_speed(session)
 
                     else:
                         logger.warning(f"{self.session_name} | <yellow>Failed to get user data!</yellow>")
-
-                sleep_ = randint(500, 1000)
-                logger.info(f"{self.session_name} | Sleep {sleep_}s...")
-                await asyncio.sleep(sleep_)
-
+                if self.multi_thread:
+                    sleep_ = randint(500, 1000)
+                    logger.info(f"{self.session_name} | Sleep {sleep_}s...")
+                    await asyncio.sleep(sleep_)
+                else:
+                    await http_client.close()
+                    session.close()
+                    break
             except InvalidSession as error:
                 raise error
 
@@ -275,6 +279,23 @@ async def run_tapper(tg_client: Client, proxy: str | None):
         sleep_ = randint(1, 15)
         logger.info(f"{tg_client.name} | start after {sleep_}s")
         await asyncio.sleep(sleep_)
-        await Tapper(tg_client=tg_client).run(proxy=proxy)
+        await Tapper(tg_client=tg_client, multi_thread=True).run(proxy=proxy)
     except InvalidSession:
         logger.error(f"{tg_client.name} | Invalid Session")
+
+async def run_tapper1(tg_clients: list[Client], proxies):
+    proxies_cycle = cycle(proxies) if proxies else None
+    while True:
+        for tg_client in tg_clients:
+            try:
+                await Tapper(tg_client=tg_client, multi_thread=False).run(next(proxies_cycle) if proxies_cycle else None)
+            except InvalidSession:
+                logger.error(f"{tg_client.name} | Invalid Session")
+
+            sleep_ = randint(settings.DELAY_EACH_ACCOUNT[0], settings.DELAY_EACH_ACCOUNT[1])
+            logger.info(f"Sleep {sleep_}s...")
+            await asyncio.sleep(sleep_)
+
+        sleep_ = randint(520, 700)
+        logger.info(f"<red>Sleep {sleep_}s...</red>")
+        await asyncio.sleep(sleep_)
