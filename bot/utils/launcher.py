@@ -9,8 +9,8 @@ from better_proxy import Proxy
 
 from bot.config import settings
 from bot.utils import logger
-from bot.core.tapper import run_tapper
-from bot.core.query import run_query_tapper
+from bot.core.tapper import run_tapper, run_tapper1
+from bot.core.query import run_query_tapper, run_query_tapper1
 from bot.core.registrator import register_sessions
 
 
@@ -94,14 +94,41 @@ async def process() -> None:
     if action == 2:
         await register_sessions()
     elif action == 1:
-        tg_clients = await get_tg_clients()
+        ans = None
+        while True:
+            ans = input("> Do you want to run the bot with multi-thread? (y/n) ")
+            if ans not in ["y", "n"]:
+                logger.warning("Answer must be y or n")
+            else:
+                break
 
-        await run_tasks(tg_clients=tg_clients)
+        if ans == "y":
+            tg_clients = await get_tg_clients()
+
+            await run_tasks(tg_clients=tg_clients)
+        else:
+            tg_clients = await get_tg_clients()
+            proxies = get_proxies()
+            await run_tapper1(tg_clients=tg_clients, proxies=proxies)
     elif action == 3:
-        with open("data.txt", "r") as f:
-            query_ids = [line.strip() for line in f.readlines()]
-        # proxies = get_proxies()
-        await run_tasks_query(query_ids)
+        ans = None
+        while True:
+            ans = input("> Do you want to run the bot with multi-thread? (y/n) ")
+            if ans not in ["y", "n"]:
+                logger.warning("Answer must be y or n")
+            else:
+                break
+        if ans == "y":
+            with open("data.txt", "r") as f:
+                query_ids = [line.strip() for line in f.readlines()]
+            # proxies = get_proxies()
+            await run_tasks_query(query_ids)
+        else:
+            with open("data.txt", "r") as f:
+                query_ids = [line.strip() for line in f.readlines()]
+            proxies = get_proxies()
+
+            await run_query_tapper1(query_ids, proxies)
 
 async def run_tasks_query(query_ids: list[str]):
     proxies = get_proxies()
