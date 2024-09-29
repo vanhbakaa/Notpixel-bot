@@ -247,6 +247,7 @@ class Tapper:
                                 self.repaint(session, total_chance)
                                 sleep_ = random.uniform(2,5)
                                 logger.info(f"{self.session_name} | Sleep <cyan>{sleep_}</cyan> before continue...")
+                                await asyncio.sleep(sleep_)
 
                         if settings.AUTO_UPGRADE_PAINT_REWARD:
                             await self.auto_upgrade_paint(session)
