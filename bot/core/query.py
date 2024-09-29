@@ -248,8 +248,8 @@ class Tapper:
                             await self.auto_upgrade_paint(session)
                         if settings.AUTO_UPGRADE_RECHARGE_ENERGY:
                             await self.auto_upgrade_recharge_speed(session)
-                        if settings.AUTO_UPGRADE_RECHARGE_ENERGY:
-                            await self.auto_upgrade_recharge_speed(session)
+                        if settings.AUTO_UPGRADE_RECHARGE_SPEED :
+                            await self.auto_upgrade_energy_limit(session)
 
                     else:
                         logger.warning(f"{self.session_name} | <yellow>Failed to get user data!</yellow>")
