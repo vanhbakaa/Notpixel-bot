@@ -205,14 +205,14 @@ class Tapper:
                 session.proxies.update(proxies)
                 logger.info(f"{self.session_name} | bind with proxy ip: {proxy}")
 
-        token_live_time = randint(2500, 2700)
+        token_live_time = randint(2000, 2500)
         while True:
             try:
                 if time() - access_token_created_time >= token_live_time:
                     tg_web_data = await self.get_tg_web_data(proxy=proxy)
                     headers['Authorization'] = f"initData {tg_web_data}"
                     access_token_created_time = time()
-                    token_live_time = randint(2500, 2700)
+                    token_live_time = randint(2000, 2500)
 
                 if self.login(session):
                     user = self.get_user_data(session)
@@ -247,7 +247,6 @@ class Tapper:
                                 self.repaint(session, total_chance)
                                 sleep_ = random.uniform(2,5)
                                 logger.info(f"{self.session_name} | Sleep <cyan>{sleep_}</cyan> before continue...")
-                                await asyncio.sleep(sleep_)
 
                         if settings.AUTO_UPGRADE_PAINT_REWARD:
                             await self.auto_upgrade_paint(session)
