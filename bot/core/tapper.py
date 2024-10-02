@@ -156,7 +156,8 @@ class Tapper:
         if response.status_code == 200:
             logger.success(f"{self.session_name} | <green>Painted successfully balace: <light-blue>{response.json()['balance']}</light-blue> | Repaint left: <yellow>{chance_left}</yellow></green>")
         else:
-            logger.warning(f"{self.session_name} | Faled to repaint: {response.json()}")
+            print(response.text)
+            logger.warning(f"{self.session_name} | Faled to repaint: {response.status_code()}")
 
 
     def auto_task(self, session: cloudscraper.CloudScraper):
