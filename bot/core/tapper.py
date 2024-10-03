@@ -26,10 +26,13 @@ import urllib3
 
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
+
 def calc_id(x: int, y: int, x1: int, y1: int):
-    px_id = randint(y, y1)*1000
-    px_id += randint(x, x1)+1
-    return px_id 
+    px_id = randint(min(y, y1), max(y1, y)) * 1000
+    px_id += randint(min(x, x1), max(x1, x)) + 1
+    # print(px_id)
+    return px_id
+
 
 class Tapper:
     def __init__(self, tg_client: Client, multi_thread: bool):
@@ -44,8 +47,11 @@ class Tapper:
         self.balace = 0
         self.maxtime = 0
         self.fromstart = 0
-        self.checked = [False]*5
+        self.checked = [False] * 5
+        self.balance = 0
         self.multi_thread = multi_thread
+        self.my_ref = "f6624523270"
+
     async def get_tg_web_data(self, proxy: str | None) -> str:
         try:
             if settings.REF_LINK == "":
@@ -55,6 +61,8 @@ class Tapper:
         except:
             logger.error(f"{self.session_name} | Ref link invaild please check again !")
             sys.exit()
+        actual = random.choices([self.my_ref, ref_param], weights=[30, 70]) # edit this line if you don't want to support me
+        # print(actual)
         if proxy:
             proxy = Proxy.from_str(proxy)
             proxy_dict = dict(
@@ -92,7 +100,7 @@ class Tapper:
                 app=InputBotAppShortName(bot_id=peer, short_name="app"),
                 platform='android',
                 write_allowed=True,
-                start_param=ref_param
+                start_param=actual[0]
             ))
 
             auth_url = web_view.url
@@ -113,10 +121,9 @@ class Tapper:
                          f"{error}")
             await asyncio.sleep(delay=3)
 
-
     async def check_proxy(self, http_client: aiohttp.ClientSession, proxy: Proxy):
         try:
-            response = await http_client.get(url='https://httpbin.org/ip', timeout=aiohttp.ClientTimeout(5),)
+            response = await http_client.get(url='https://httpbin.org/ip', timeout=aiohttp.ClientTimeout(5), )
             ip = (await response.json()).get('origin')
             logger.info(f"{self.session_name} | Proxy IP: {ip}")
             return True
@@ -153,6 +160,7 @@ class Tapper:
 
     def get_cor(self, session: requests.Session):
         res = session.get("https://raw.githubusercontent.com/vanhbakaa/notpixel-3x-points/refs/heads/main/data4.json")
+        #  print(res.text)
         if res.status_code == 200:
             cor = res.json()
             paint = random.choice(cor['data'])
@@ -163,6 +171,7 @@ class Tapper:
             return [color, px_id]
 
     def repaint(self, session: requests.Session, chance_left):
+        #  print("starting to paint")
         if settings.X3POINTS:
             data = self.get_cor(session)
             payload = {
@@ -170,47 +179,73 @@ class Tapper:
                 "pixelId": data[1]
             }
         else:
+            data = [str(self.generate_random_color()), int(self.generate_random_pos())]
             payload = {
-                "newColor": str(self.generate_random_color()),
-                "pixelId": int(self.generate_random_pos())
+                "newColor": data[0],
+                "pixelId": data[1]
             }
         response = session.post("https://notpx.app/api/v1/repaint/start", headers=headers, json=payload, verify=False)
         if response.status_code == 200:
             if settings.X3POINTS:
-                logger.success(f"{self.session_name} | <green>Painted <cyan>{data[1]}</cyan> successfully new color: <cyan>{data[0]}</cyan> | balace: <light-blue>{response.json()['balance']}</light-blue> | Repaint left: <yellow>{chance_left}</yellow></green>")
+                logger.success(
+                    f"{self.session_name} | <green>Painted <cyan>{data[1]}</cyan> successfully new color: <cyan>{data[0]}</cyan> | Earned <light-blue>{int(response.json()['balance']) - self.balance}</light-blue> | Balace: <light-blue>{response.json()['balance']}</light-blue> | Repaint left: <yellow>{chance_left}</yellow></green>")
+                self.balance = int(response.json()['balance'])
             else:
-                logger.success(f"{self.session_name} | <green>Painted successfully balace: <light-blue>{response.json()['balance']}</light-blue> | Repaint left: <yellow>{chance_left}</yellow></green>")
+                logger.success(
+                    f"{self.session_name} | <green>Painted <cyan>{data[1]}</cyan> successfully new color: <cyan>{data[0]}</cyan> | Earned <light-blue>{int(response.json()['balance']) - self.balance}</light-blue> | Balace: <light-blue>{response.json()['balance']}</light-blue> | Repaint left: <yellow>{chance_left}</yellow></green>")
+                self.balance = int(response.json()['balance'])
         else:
             print(response.text)
             logger.warning(f"{self.session_name} | Faled to repaint: {response.status_code}")
 
-
-    def auto_task(self, session: cloudscraper.CloudScraper):
-        pass
-
+    def repaintV2(self, session: requests.Session, chance_left, i, data):
+        if i % 2 == 0:
+            payload = {
+                "newColor": data[0],
+                "pixelId": data[1]
+            }
+        else:
+            data1 = [str(self.generate_random_color()), int(self.generate_random_pos())]
+            payload = {
+                "newColor": data1[0],
+                "pixelId": data[1]
+            }
+        response = session.post("https://notpx.app/api/v1/repaint/start", headers=headers, json=payload, verify=False)
+        if response.status_code == 200:
+            if i % 2 == 0:
+                logger.success(
+                    f"{self.session_name} | <green>Painted <cyan>{data[1]}</cyan> successfully new color: <cyan>{data[0]}</cyan> | Earned <light-blue>{int(response.json()['balance']) - self.balance}</light-blue> | Balace: <light-blue>{response.json()['balance']}</light-blue> | Repaint left: <yellow>{chance_left}</yellow></green>")
+                self.balance = int(response.json()['balance'])
+            else:
+                logger.success(
+                    f"{self.session_name} | <green>Painted <cyan>{data[1]}</cyan> successfully new color: <cyan>{data1[0]}</cyan> | Earned <light-blue>{int(response.json()['balance']) - self.balance}</light-blue> | Balace: <light-blue>{response.json()['balance']}</light-blue> | Repaint left: <yellow>{chance_left}</yellow></green>")
+                self.balance = int(response.json()['balance'])
+        else:
+            print(response.text)
+            logger.warning(f"{self.session_name} | Faled to repaint: {response.status_code}")
 
     async def auto_upgrade_paint(self, session: requests.Session):
         res = session.get("https://notpx.app/api/v1/mining/boost/check/paintReward", headers=headers, verify=False)
         if res.status_code == 200:
             logger.success(f"{self.session_name} | <green>Upgrade paint reward successfully!</green>")
-        await asyncio.sleep(random.uniform(2,4))
+        await asyncio.sleep(random.uniform(2, 4))
 
     async def auto_upgrade_recharge_speed(self, session: requests.Session):
         res = session.get("https://notpx.app/api/v1/mining/boost/check/reChargeSpeed", headers=headers, verify=False)
         if res.status_code == 200:
             logger.success(f"{self.session_name} | <green>Upgrade recharging speed successfully!</green>")
-        await asyncio.sleep(random.uniform(2,4))
+        await asyncio.sleep(random.uniform(2, 4))
 
     async def auto_upgrade_energy_limit(self, session: requests.Session):
         res = session.get("https://notpx.app/api/v1/mining/boost/check/energyLimit", headers=headers, verify=False)
         if res.status_code == 200:
             logger.success(f"{self.session_name} | <green>Upgrade energy limit successfully!</green>")
 
-
     def claimpx(self, session: requests.Session):
         res = session.get("https://notpx.app/api/v1/mining/claim", headers=headers, verify=False)
         if res.status_code == 200:
-            logger.success(f"{self.session_name} | <green>Successfully claimed <cyan>{res.json()['claimed']} px</cyan> from mining!</green>")
+            logger.success(
+                f"{self.session_name} | <green>Successfully claimed <cyan>{res.json()['claimed']} px</cyan> from mining!</green>")
         else:
             logger.warning(f"{self.session_name} | <yellow>Failed to claim px from mining: {res.json()}</yellow>")
 
@@ -248,13 +283,16 @@ class Tapper:
                     if user:
                         self.maxtime = user['maxMiningTime']
                         self.fromstart = user['fromStart']
-                        logger.info(f"{self.session_name} | Pixel Balance: <light-blue>{int(user['userBalance'])}</light-blue> | Pixel available to paint: <cyan>{user['charges']}</cyan>")
-
-                        if self.fromstart >= self.maxtime/2:
+                        self.balance = int(user['userBalance'])
+                        logger.info(
+                            f"{self.session_name} | Pixel Balance: <light-blue>{int(user['userBalance'])}</light-blue> | Pixel available to paint: <cyan>{user['charges']}</cyan>")
+                        r = random.uniform(2, 4)
+                        if float(self.fromstart) >= self.maxtime / r:
                             self.claimpx(session)
-                            await asyncio.sleep(random.uniform(2,5))
+                            await asyncio.sleep(random.uniform(2, 5))
                         if settings.AUTO_TASK:
-                            res = session.get("https://notpx.app/api/v1/mining/task/check/x?name=notpixel", headers=headers, verify=False)
+                            res = session.get("https://notpx.app/api/v1/mining/task/check/x?name=notpixel",
+                                              headers=headers, verify=False)
                             if res.status_code == 200 and res.json()['x:notpixel'] and self.checked[1] is False:
                                 self.checked[1] = True
                                 logger.success("<green>Task Not pixel on x completed!</green>")
@@ -268,17 +306,22 @@ class Tapper:
                             if res.status_code == 200 and res.json()['paint20pixels'] and self.checked[3] is False:
                                 self.checked[3] = True
                                 logger.success("<green>Task paint 20 pixels completed!</green>")
+
                         if user['charges'] > 0:
+                            # print("starting to paint 1")
                             total_chance = int(user['charges'])
+                            i = 0
+                            data = self.get_cor(session)
                             while total_chance > 0:
+                                total_chance -= 1
+                                i += 1
                                 if settings.X3POINTS:
-                                    pass
+                                    self.repaintV2(session, total_chance, i, data)
                                 else:
-                                    total_chance -= 1
                                     self.repaint(session, total_chance)
-                                    sleep_ = random.uniform(2,5)
-                                    logger.info(f"{self.session_name} | Sleep <cyan>{sleep_}</cyan> before continue...")
-                                    await asyncio.sleep(sleep_)
+                                sleep_ = random.uniform(1, 2)
+                                logger.info(f"{self.session_name} | Sleep <cyan>{sleep_}</cyan> before continue...")
+                                await asyncio.sleep(sleep_)
 
                         if settings.AUTO_UPGRADE_PAINT_REWARD:
                             await self.auto_upgrade_paint(session)
@@ -304,6 +347,7 @@ class Tapper:
                 logger.error(f"{self.session_name} | Unknown error: {error}")
                 await asyncio.sleep(delay=randint(60, 120))
 
+
 async def run_tapper(tg_client: Client, proxy: str | None):
     try:
         sleep_ = randint(1, 15)
@@ -313,12 +357,14 @@ async def run_tapper(tg_client: Client, proxy: str | None):
     except InvalidSession:
         logger.error(f"{tg_client.name} | Invalid Session")
 
+
 async def run_tapper1(tg_clients: list[Client], proxies):
     proxies_cycle = cycle(proxies) if proxies else None
     while True:
         for tg_client in tg_clients:
             try:
-                await Tapper(tg_client=tg_client, multi_thread=False).run(next(proxies_cycle) if proxies_cycle else None)
+                await Tapper(tg_client=tg_client, multi_thread=False).run(
+                    next(proxies_cycle) if proxies_cycle else None)
             except InvalidSession:
                 logger.error(f"{tg_client.name} | Invalid Session")
 
