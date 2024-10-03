@@ -286,6 +286,23 @@ class Tapper:
                         self.balance = int(user['userBalance'])
                         logger.info(
                             f"{self.session_name} | Pixel Balance: <light-blue>{int(user['userBalance'])}</light-blue> | Pixel available to paint: <cyan>{user['charges']}</cyan>")
+
+                        if user['charges'] > 0:
+                            # print("starting to paint 1")
+                            total_chance = int(user['charges'])
+                            i = 0
+                            data = self.get_cor(session)
+                            while total_chance > 0:
+                                total_chance -= 1
+                                i += 1
+                                if settings.X3POINTS:
+                                    self.repaintV2(session, total_chance, i, data)
+                                else:
+                                    self.repaint(session, total_chance)
+                                sleep_ = random.uniform(1, 2)
+                                logger.info(f"{self.session_name} | Sleep <cyan>{sleep_}</cyan> before continue...")
+                                await asyncio.sleep(sleep_)
+
                         r = random.uniform(2, 4)
                         if float(self.fromstart) >= self.maxtime / r:
                             self.claimpx(session)
@@ -306,22 +323,6 @@ class Tapper:
                             if res.status_code == 200 and res.json()['paint20pixels'] and self.checked[3] is False:
                                 self.checked[3] = True
                                 logger.success("<green>Task paint 20 pixels completed!</green>")
-
-                        if user['charges'] > 0:
-                            # print("starting to paint 1")
-                            total_chance = int(user['charges'])
-                            i = 0
-                            data = self.get_cor(session)
-                            while total_chance > 0:
-                                total_chance -= 1
-                                i += 1
-                                if settings.X3POINTS:
-                                    self.repaintV2(session, total_chance, i, data)
-                                else:
-                                    self.repaint(session, total_chance)
-                                sleep_ = random.uniform(1, 2)
-                                logger.info(f"{self.session_name} | Sleep <cyan>{sleep_}</cyan> before continue...")
-                                await asyncio.sleep(sleep_)
 
                         if settings.AUTO_UPGRADE_PAINT_REWARD:
                             await self.auto_upgrade_paint(session)
