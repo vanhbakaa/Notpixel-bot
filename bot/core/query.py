@@ -22,10 +22,10 @@ import urllib3
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 def calc_id(x: int, y: int, x1: int, y1: int):
-    px_id = randint(y, y1)*1000
-    px_id += randint(x, x1)+1
+    px_id = randint(min(y, y1), max(y1, y))*1000
+    px_id += randint(min(x, x1), max(x1, x))+1
+    # print(px_id)
     return px_id
-
 
 class Tapper:
     def __init__(self, query: str, session_name, multi_thread):
@@ -92,6 +92,7 @@ class Tapper:
             return [color, px_id]
 
     def repaint(self, session: requests.Session, chance_left):
+        #  print("starting to paint")
         if settings.X3POINTS:
             data = self.get_cor(session)
             payload = {
@@ -99,16 +100,47 @@ class Tapper:
                 "pixelId": data[1]
             }
         else:
+            data = [str(self.generate_random_color()), int(self.generate_random_pos())]
             payload = {
-                "newColor": str(self.generate_random_color()),
-                "pixelId": int(self.generate_random_pos())
+                "newColor": data[0],
+                "pixelId": data[1]
             }
         response = session.post("https://notpx.app/api/v1/repaint/start", headers=headers, json=payload, verify=False)
         if response.status_code == 200:
             if settings.X3POINTS:
-                logger.success(f"{self.session_name} | <green>Painted <cyan>{data[1]}</cyan> successfully new color: <cyan>{data[0]}</cyan> | balace: <light-blue>{response.json()['balance']}</light-blue> | Repaint left: <yellow>{chance_left}</yellow></green>")
+                logger.success(
+                    f"{self.session_name} | <green>Painted <cyan>{data[1]}</cyan> successfully new color: <cyan>{data[0]}</cyan> | Earned <light-blue>{int(response.json()['balance']) - self.balance}</light-blue> | Balace: <light-blue>{response.json()['balance']}</light-blue> | Repaint left: <yellow>{chance_left}</yellow></green>")
+                self.balance = int(response.json()['balance'])
             else:
-                logger.success(f"{self.session_name} | <green>Painted successfully balace: <light-blue>{response.json()['balance']}</light-blue> | Repaint left: <yellow>{chance_left}</yellow></green>")
+                logger.success(
+                    f"{self.session_name} | <green>Painted <cyan>{data[1]}</cyan> successfully new color: <cyan>{data[0]}</cyan> | Earned <light-blue>{int(response.json()['balance']) - self.balance}</light-blue> | Balace: <light-blue>{response.json()['balance']}</light-blue> | Repaint left: <yellow>{chance_left}</yellow></green>")
+                self.balance = int(response.json()['balance'])
+        else:
+            print(response.text)
+            logger.warning(f"{self.session_name} | Faled to repaint: {response.status_code}")
+
+    def repaintV2(self, session: requests.Session, chance_left, i, data):
+        if i % 2 == 0:
+            payload = {
+                "newColor": data[0],
+                "pixelId": data[1]
+            }
+        else:
+            data1 = [str(self.generate_random_color()), int(self.generate_random_pos())]
+            payload = {
+                "newColor": data1[0],
+                "pixelId": data[1]
+            }
+        response = session.post("https://notpx.app/api/v1/repaint/start", headers=headers, json=payload, verify=False)
+        if response.status_code == 200:
+            if i % 2 == 0:
+                logger.success(
+                    f"{self.session_name} | <green>Painted <cyan>{data[1]}</cyan> successfully new color: <cyan>{data[0]}</cyan> | Earned <light-blue>{int(response.json()['balance']) - self.balance}</light-blue> | Balace: <light-blue>{response.json()['balance']}</light-blue> | Repaint left: <yellow>{chance_left}</yellow></green>")
+                self.balance = int(response.json()['balance'])
+            else:
+                logger.success(
+                    f"{self.session_name} | <green>Painted <cyan>{data[1]}</cyan> successfully new color: <cyan>{data1[0]}</cyan> | Earned <light-blue>{int(response.json()['balance']) - self.balance}</light-blue> | Balace: <light-blue>{response.json()['balance']}</light-blue> | Repaint left: <yellow>{chance_left}</yellow></green>")
+                self.balance = int(response.json()['balance'])
         else:
             print(response.text)
             logger.warning(f"{self.session_name} | Faled to repaint: {response.status_code}")
@@ -176,35 +208,45 @@ class Tapper:
                     if user:
                         self.maxtime = user['maxMiningTime']
                         self.fromstart = user['fromStart']
+                        self.balance = int(user['userBalance'])
                         logger.info(
                             f"{self.session_name} | Pixel Balance: <light-blue>{int(user['userBalance'])}</light-blue> | Pixel available to paint: <cyan>{user['charges']}</cyan>")
-
-                        if self.fromstart >= self.maxtime / 2:
+                        r = random.uniform(2, 4)
+                        if float(self.fromstart) >= self.maxtime / r:
                             self.claimpx(session)
                             await asyncio.sleep(random.uniform(2, 5))
                         if settings.AUTO_TASK:
                             res = session.get("https://notpx.app/api/v1/mining/task/check/x?name=notpixel",
-                                              headers=headers)
+                                              headers=headers, verify=False)
                             if res.status_code == 200 and res.json()['x:notpixel'] and self.checked[1] is False:
                                 self.checked[1] = True
                                 logger.success("<green>Task Not pixel on x completed!</green>")
                             res = session.get("https://notpx.app/api/v1/mining/task/check/x?name=notcoin",
-                                              headers=headers)
+                                              headers=headers, verify=False)
                             if res.status_code == 200 and res.json()['x:notcoin'] and self.checked[2] is False:
                                 self.checked[2] = True
                                 logger.success("<green>Task Not coin on x completed!</green>")
                             res = session.get("https://notpx.app/api/v1/mining/task/check/paint20pixels",
-                                              headers=headers)
+                                              headers=headers, verify=False)
                             if res.status_code == 200 and res.json()['paint20pixels'] and self.checked[3] is False:
                                 self.checked[3] = True
                                 logger.success("<green>Task paint 20 pixels completed!</green>")
+
                         if user['charges'] > 0:
+                            # print("starting to paint 1")
                             total_chance = int(user['charges'])
+                            i = 0
+                            data = self.get_cor(session)
                             while total_chance > 0:
                                 total_chance -= 1
-                                self.repaint(session, total_chance)
-                                sleep_ = random.uniform(2, 5)
+                                i += 1
+                                if settings.X3POINTS:
+                                    self.repaintV2(session, total_chance, i, data)
+                                else:
+                                    self.repaint(session, total_chance)
+                                sleep_ = random.uniform(1, 2)
                                 logger.info(f"{self.session_name} | Sleep <cyan>{sleep_}</cyan> before continue...")
+                                await asyncio.sleep(sleep_)
 
                         if settings.AUTO_UPGRADE_PAINT_REWARD:
                             await self.auto_upgrade_paint(session)
