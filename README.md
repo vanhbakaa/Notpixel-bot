@@ -23,6 +23,7 @@
 | Auto ref                                                      |        ✅        |
 | Auto claim                                                    |        ✅        |
 | Auto paint                                                    |        ✅        |
+| Auto paint specific pixel to get 3x px                        |        ✅        |
 | Auto task                                                     |        ✅        |
 | Auto UPGRADE                                                  |        ✅        |
 | Support for pyrogram .session / Query                         |        ✅        |
@@ -32,8 +33,11 @@
 |----------------------------|:-------------------------------------------------------------------------------------------------------------:|
 | **API_ID / API_HASH**      | Platform data from which to run the Telegram session (default - android)                                      |       
 | **REF_LINK**               | Put your ref link here (default: my ref link)                                                                 |
-| **AUTO_TASK**              | Auto do task (default: True)                                                                                  |
-| **AUTO_UPDGRADE**          | AUTO upgrade if possible (default: True)                                                                      |
+| **X3POINTS** | Auto paint specific pixel to get 3x px (default: True)                                                                      |
+| **AUTO_TASK**              |  Auto do tasks (default: True)                                                                                  |
+| **AUTO_UPGRADE_PAINT_REWARD** | AUTO upgrade paint reward if possible (default: True)                                                                      |
+| **AUTO_UPGRADE_RECHARGE_SPEED** | AUTO upgrade recharge speed if possible (default: True)                                                                      |
+| **AUTO_UPGRADE_RECHARGE_ENERGY** | AUTO upgrade energy limit if possible (default: True)                                                                      |
 | **USE_PROXY_FROM_FILE**    | Whether to use a proxy from the bot/config/proxies.txt file (True / False)                                    |
 
 
