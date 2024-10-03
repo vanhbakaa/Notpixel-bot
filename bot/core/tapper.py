@@ -26,6 +26,11 @@ import urllib3
 
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
+def calc_id(x: int, y: int, x1: int, y1: int):
+    px_id = randint(y, y1)*1000
+    px_id += randint(x, x1)+1
+    return px_id 
+
 class Tapper:
     def __init__(self, tg_client: Client, multi_thread: bool):
         self.tg_client = tg_client
@@ -63,7 +68,6 @@ class Tapper:
             proxy_dict = None
 
         self.tg_client.proxy = proxy_dict
-
         try:
             if not self.tg_client.is_connected:
                 try:
@@ -147,17 +151,38 @@ class Tapper:
     def generate_random_pos(self):
         return randint(1, 1000000)
 
+    def get_cor(self, session: requests.Session):
+        res = session.get("https://raw.githubusercontent.com/vanhbakaa/notpixel-3x-points/refs/heads/main/data4.json")
+        if res.status_code == 200:
+            cor = res.json()
+            paint = random.choice(cor['data'])
+            color = paint['color']
+            random_cor = random.choice(paint['cordinates'])
+            # print(f"{color}: {random_cor}")
+            px_id = calc_id(random_cor['start'][0], random_cor['start'][1], random_cor['end'][0], random_cor['end'][1])
+            return [color, px_id]
+
     def repaint(self, session: requests.Session, chance_left):
-        payload = {
-            "newColor": str(self.generate_random_color()),
-            "pixelId": int(self.generate_random_pos())
-        }
+        if settings.X3POINTS:
+            data = self.get_cor(session)
+            payload = {
+                "newColor": data[0],
+                "pixelId": data[1]
+            }
+        else:
+            payload = {
+                "newColor": str(self.generate_random_color()),
+                "pixelId": int(self.generate_random_pos())
+            }
         response = session.post("https://notpx.app/api/v1/repaint/start", headers=headers, json=payload, verify=False)
         if response.status_code == 200:
-            logger.success(f"{self.session_name} | <green>Painted successfully balace: <light-blue>{response.json()['balance']}</light-blue> | Repaint left: <yellow>{chance_left}</yellow></green>")
+            if settings.X3POINTS:
+                logger.success(f"{self.session_name} | <green>Painted <cyan>{data[1]}</cyan> successfully new color: <cyan>{data[0]}</cyan> | balace: <light-blue>{response.json()['balance']}</light-blue> | Repaint left: <yellow>{chance_left}</yellow></green>")
+            else:
+                logger.success(f"{self.session_name} | <green>Painted successfully balace: <light-blue>{response.json()['balance']}</light-blue> | Repaint left: <yellow>{chance_left}</yellow></green>")
         else:
             print(response.text)
-            logger.warning(f"{self.session_name} | Faled to repaint: {response.status_code()}")
+            logger.warning(f"{self.session_name} | Faled to repaint: {response.status_code}")
 
 
     def auto_task(self, session: cloudscraper.CloudScraper):
@@ -188,6 +213,7 @@ class Tapper:
             logger.success(f"{self.session_name} | <green>Successfully claimed <cyan>{res.json()['claimed']} px</cyan> from mining!</green>")
         else:
             logger.warning(f"{self.session_name} | <yellow>Failed to claim px from mining: {res.json()}</yellow>")
+
     async def run(self, proxy: str | None) -> None:
         access_token_created_time = 0
         proxy_conn = ProxyConnector().from_url(proxy) if proxy else None
@@ -245,11 +271,14 @@ class Tapper:
                         if user['charges'] > 0:
                             total_chance = int(user['charges'])
                             while total_chance > 0:
-                                total_chance -= 1
-                                self.repaint(session, total_chance)
-                                sleep_ = random.uniform(2,5)
-                                logger.info(f"{self.session_name} | Sleep <cyan>{sleep_}</cyan> before continue...")
-                                await asyncio.sleep(sleep_)
+                                if settings.X3POINTS:
+                                    pass
+                                else:
+                                    total_chance -= 1
+                                    self.repaint(session, total_chance)
+                                    sleep_ = random.uniform(2,5)
+                                    logger.info(f"{self.session_name} | Sleep <cyan>{sleep_}</cyan> before continue...")
+                                    await asyncio.sleep(sleep_)
 
                         if settings.AUTO_UPGRADE_PAINT_REWARD:
                             await self.auto_upgrade_paint(session)
