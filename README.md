@@ -26,6 +26,7 @@
 | Auto paint specific pixel to get 3x px                        |        ✅        |
 | Auto task                                                     |        ✅        |
 | Auto UPGRADE                                                  |        ✅        |
+| Night mode                                                    |        ✅        |
 | Support for pyrogram .session / Query                         |        ✅        |
 
 ## [Settings](https://github.com/vanhbakaa/Notpixel-bot/blob/main/.env-example)
@@ -38,6 +39,8 @@
 | **AUTO_UPGRADE_PAINT_REWARD** | AUTO upgrade paint reward if possible (default: True)                                                                      |
 | **AUTO_UPGRADE_RECHARGE_SPEED** | AUTO upgrade recharge speed if possible (default: True)                                                                      |
 | **AUTO_UPGRADE_RECHARGE_ENERGY** | AUTO upgrade energy limit if possible (default: True)                                                                      |
+| **NIGHT_MODE** | Sleep time for the bot (default: True)                                                                      |
+| **SLEEP_TIME** | Sleep in your timezone for the bot (default: [0, 7] 0am to 7am)                                                                     |
 | **USE_PROXY_FROM_FILE**    | Whether to use a proxy from the bot/config/proxies.txt file (True / False)                                    |
 
 
