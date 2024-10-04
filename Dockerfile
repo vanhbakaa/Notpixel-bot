@@ -1,4 +1,4 @@
-FROM python:3.10.11-alpine3.18
+FROM python:3.11.5-alpine3.18
 
 WORKDIR app/
 
@@ -9,4 +9,4 @@ RUN pip3 install --no-warn-script-location --no-cache-dir -r requirements.txt
 
 COPY . .
 
-CMD ["python3", "main.py", "-a", "1"]
+CMD ["python3", "main.py", "-a", "1", "-m", "n"]
