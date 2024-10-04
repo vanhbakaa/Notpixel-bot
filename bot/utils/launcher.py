@@ -72,10 +72,11 @@ async def get_tg_clients() -> list[Client]:
 async def process() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("-a", "--action", type=int, help="Action to perform")
-
-    logger.info(f"Detected {len(get_session_names())} sessions | {len(get_proxies())} proxies")
+    parser.add_argument("-m", "--multithread", type=str, help="Enable multi-threading")
 
     action = parser.parse_args().action
+    ans = parser.parse_args().multithread
+    logger.info(f"Detected {len(get_session_names())} sessions | {len(get_proxies())} proxies")
 
     if not action:
         print(start_text)
@@ -94,13 +95,13 @@ async def process() -> None:
     if action == 2:
         await register_sessions()
     elif action == 1:
-        ans = None
-        while True:
-            ans = input("> Do you want to run the bot with multi-thread? (y/n) ")
-            if ans not in ["y", "n"]:
-                logger.warning("Answer must be y or n")
-            else:
-                break
+        if ans is None:
+            while True:
+                ans = input("> Do you want to run the bot with multi-thread? (y/n) ")
+                if ans not in ["y", "n"]:
+                    logger.warning("Answer must be y or n")
+                else:
+                    break
 
         if ans == "y":
             tg_clients = await get_tg_clients()
@@ -111,13 +112,13 @@ async def process() -> None:
             proxies = get_proxies()
             await run_tapper1(tg_clients=tg_clients, proxies=proxies)
     elif action == 3:
-        ans = None
-        while True:
-            ans = input("> Do you want to run the bot with multi-thread? (y/n) ")
-            if ans not in ["y", "n"]:
-                logger.warning("Answer must be y or n")
-            else:
-                break
+        if ans is None:
+            while True:
+                ans = input("> Do you want to run the bot with multi-thread? (y/n) ")
+                if ans not in ["y", "n"]:
+                    logger.warning("Answer must be y or n")
+                else:
+                    break
         if ans == "y":
             with open("data.txt", "r") as f:
                 query_ids = [line.strip() for line in f.readlines()]
