@@ -1,7 +1,6 @@
 import asyncio
 import random
 from itertools import cycle
-from time import time
 
 import aiohttp
 import requests
@@ -11,6 +10,9 @@ from better_proxy import Proxy
 from bot.core.agents import generate_random_user_agent
 from bot.config import settings
 import cloudscraper
+from datetime import datetime, timedelta
+from tzlocal import get_localzone
+import time as time_module
 
 from bot.utils import logger
 from bot.exceptions import InvalidSession
@@ -197,12 +199,25 @@ class Tapper:
         token_live_time = randint(1000, 1500)
         while True:
             try:
-                if time() - access_token_created_time >= token_live_time:
+                if time_module.time() - access_token_created_time >= token_live_time:
                     # tg_web_data = await self.get_tg_web_data(proxy=proxy)
                     headers['Authorization'] = f"initData {self.query}"
-                    access_token_created_time = time()
+                    access_token_created_time = time_module.time()
                     token_live_time = randint(1000, 1500)
-                    
+
+                local_timezone = get_localzone()
+                current_time = datetime.now(local_timezone)
+                start_time = current_time.replace(hour=settings.SLEEP_TIME[0], minute=0, second=0, microsecond=0)
+                end_time = current_time.replace(hour=settings.SLEEP_TIME[1], minute=0, second=0, microsecond=0)
+
+                if end_time < start_time:
+                    end_time += timedelta(days=1)
+
+                if settings.NIGHT_MODE and (start_time <= current_time <= end_time):
+                    time_to_sleep = (end_time - current_time).total_seconds()
+                    logger.info(f"{self.session_name} | Sleeping for {time_to_sleep} seconds until {end_time}.")
+                    await asyncio.sleep(time_to_sleep)
+
 
                 if self.login(session):
                     user = self.get_user_data(session)
@@ -211,7 +226,7 @@ class Tapper:
                         self.maxtime = user['maxMiningTime']
                         self.fromstart = user['fromStart']
                         self.balance = int(user['userBalance'])
-                        
+
                         if user['charges'] > 0:
                             # print("starting to paint 1")
                             total_chance = int(user['charges'])
@@ -227,7 +242,7 @@ class Tapper:
                                 sleep_ = random.uniform(1, 2)
                                 logger.info(f"{self.session_name} | Sleep <cyan>{sleep_}</cyan> before continue...")
                                 await asyncio.sleep(sleep_)
-                                
+
                         logger.info(
                             f"{self.session_name} | Pixel Balance: <light-blue>{int(user['userBalance'])}</light-blue> | Pixel available to paint: <cyan>{user['charges']}</cyan>")
                         r = random.uniform(2, 4)

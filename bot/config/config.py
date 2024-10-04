@@ -15,6 +15,9 @@ class Settings(BaseSettings):
     AUTO_UPGRADE_RECHARGE_ENERGY:bool = True
     AUTO_TASK: bool = True
 
+    NIGHT_MODE: bool = True
+    SLEEP_TIME: list[int] = [0, 7] # your time zone
+
     DELAY_EACH_ACCOUNT: list[int] = [10,15]
     USE_PROXY_FROM_FILE: bool = False
 
