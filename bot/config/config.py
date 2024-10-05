@@ -19,6 +19,7 @@ class Settings(BaseSettings):
     SLEEP_TIME: list[int] = [0, 7] # your time zone
 
     DELAY_EACH_ACCOUNT: list[int] = [10,15]
+    SLEEP_TIME_BETWEEN_EACH_ROUND: list[int] = [1000, 1500]
     USE_PROXY_FROM_FILE: bool = False
 
 
