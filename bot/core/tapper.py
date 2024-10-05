@@ -48,7 +48,7 @@ class Tapper:
         self.balace = 0
         self.maxtime = 0
         self.fromstart = 0
-        self.checked = [False] * 5
+        self.checked = [False] * 9
         self.balance = 0
         self.multi_thread = multi_thread
         self.my_ref = "f6624523270"
@@ -298,8 +298,10 @@ class Tapper:
                         self.maxtime = user['maxMiningTime']
                         self.fromstart = user['fromStart']
                         self.balance = int(user['userBalance'])
+                        repaints = int(user['repaintsTotal'])
+                        user_league = user['league']
                         logger.info(
-                            f"{self.session_name} | Pixel Balance: <light-blue>{int(user['userBalance'])}</light-blue> | Pixel available to paint: <cyan>{user['charges']}</cyan>")
+                            f"{self.session_name} | Pixel Balance: <light-blue>{int(user['userBalance'])}</light-blue> | Pixel available to paint: <cyan>{user['charges']}</cyan> | User league: <yellow>{user_league}</yellow>")
 
                         if user['charges'] > 0:
                             # print("starting to paint 1")
@@ -337,6 +339,35 @@ class Tapper:
                             if res.status_code == 200 and res.json()['paint20pixels'] and self.checked[3] is False:
                                 self.checked[3] = True
                                 logger.success("<green>Task paint 20 pixels completed!</green>")
+
+                            if repaints >= 2049:
+                                res = session.get("https://notpx.app/api/v1/mining/task/check/leagueBonusPlatinum",
+                                                  headers=headers, verify=False)
+                                if res.status_code == 200 and res.json()['leagueBonusPlatinum'] and self.checked[8] is False:
+                                    self.checked[8] = True
+                                    logger.success("<green>Upgraded to Plantium league!</green>")
+                            if repaints >= 129:
+                                res = session.get("https://notpx.app/api/v1/mining/task/check/leagueBonusGold",
+                                                  headers=headers, verify=False)
+                                if res.status_code == 200 and res.json()['leagueBonusGold'] and self.checked[
+                                    7] is False:
+                                    self.checked[7] = True
+                                    logger.success("<green>Upgraded to Gold league!</green>")
+                            if repaints >= 9:
+                                res = session.get("https://notpx.app/api/v1/mining/task/check/leagueBonusSilver",
+                                                  headers=headers, verify=False)
+                                if res.status_code == 200 and res.json()['leagueBonusSilver'] and self.checked[
+                                    6] is False:
+                                    self.checked[6] = True
+                                    logger.success("<green>Upgraded to Silver league!</green>")
+
+                            res = session.get("https://notpx.app/api/v1/mining/task/check/leagueBonusBronze",
+                                              headers=headers, verify=False)
+                            if res.status_code == 200 and res.json()['leagueBonusBronze'] and self.checked[
+                                5] is False:
+                                self.checked[5] = True
+                                logger.success("<green>Upgraded to Bronze league!</green>")
+
 
                         if settings.AUTO_UPGRADE_PAINT_REWARD:
                             await self.auto_upgrade_paint(session)
