@@ -322,6 +322,6 @@ async def run_query_tapper1(querys: list[str], proxies):
             logger.info(f"Sleep {sleep_}s...")
             await asyncio.sleep(sleep_)
 
-        sleep_ = randint(520, 700)
+        sleep_ = randint(settings.SLEEP_TIME_BETWEEN_EACH_ROUND[0], settings.SLEEP_TIME_BETWEEN_EACH_ROUND[1])
         logger.info(f"<red>Sleep {sleep_}s...</red>")
         await asyncio.sleep(sleep_)
