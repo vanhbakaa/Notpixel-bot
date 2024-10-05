@@ -121,6 +121,9 @@ You can also use arguments for quick start, for example:
 > pkg install python rust git -y
 > git clone https://github.com/vanhbakaa/Notpixel-bot.git
 > cd Notpixel-bot
+> cp .env-example .env
+> nano .env
+# edit your api_id and api_hash
 > pip install -r requirements.txt
 > python main.py
 ```
