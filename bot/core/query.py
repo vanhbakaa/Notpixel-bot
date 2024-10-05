@@ -281,7 +281,8 @@ class Tapper:
                     logger.warning(f"invaild query: <yellow>{self.query}</yellow>")
 
                 if self.multi_thread:
-                    sleep_ = randint(500, 1000)
+                    sleep_ = randint(settings.SLEEP_TIME_BETWEEN_EACH_ROUND[0],
+                                     settings.SLEEP_TIME_BETWEEN_EACH_ROUND[1])
                     logger.info(f"{self.session_name} | Sleep {sleep_}s...")
                     await asyncio.sleep(sleep_)
                 else:
