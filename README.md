@@ -41,7 +41,7 @@
 | **AUTO_UPGRADE_RECHARGE_ENERGY** | AUTO upgrade energy limit if possible (default: True)                                                                      |
 | **NIGHT_MODE** | Sleep time for the bot (default: True)                                                                      |
 | **SLEEP_TIME** | Sleep in your timezone for the bot (default: [0, 7] 0am to 7am)                                                                     |
-| **SLEEP_BETWEEN_EACH_ROUND** | Sleep time in second between each round (default: [1000, 1500] 0am to 7am)                                                                     |
+| **SLEEP_BETWEEN_EACH_ROUND** | Sleep time in second between each round (default: [1000, 1500])                                                                     |
 | **USE_PROXY_FROM_FILE**    | Whether to use a proxy from the bot/config/proxies.txt file (True / False)                                    |
 
 
