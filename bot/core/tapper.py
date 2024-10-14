@@ -151,8 +151,11 @@ class Tapper:
             print(response.json())
             return None
 
-    def generate_random_color(self):
-        return random.choice(self.color_list)
+    def generate_random_color(self, color):
+        a = random.choice(self.color_list)
+        while a == color:
+            a = random.choice(self.color_list)
+        return a
 
     def generate_random_pos(self):
         return randint(1, 1000000)
@@ -179,7 +182,7 @@ class Tapper:
             }
             data = self.get_cor(session)
         else:
-            data = [str(self.generate_random_color()), int(self.generate_random_pos())]
+            data = [str(self.generate_random_color(data[0])), int(self.generate_random_pos())]
             payload = {
                 "newColor": data[0],
                 "pixelId": data[1]
@@ -206,7 +209,7 @@ class Tapper:
             }
             
         else:
-            data1 = [str(self.generate_random_color()), int(self.generate_random_pos())]
+            data1 = [str(self.generate_random_color(data[0])), int(self.generate_random_pos())]
             payload = {
                 "newColor": data1[0],
                 "pixelId": data[1]
