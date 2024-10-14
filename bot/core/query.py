@@ -42,7 +42,7 @@ class Tapper:
         self.balace = 0
         self.maxtime = 0
         self.fromstart = 0
-        self.color_list = ["#E46E6E", "#FFD635" , "#7EED56", "#00CCC0", "#51E9F4", "#000000"]
+        self.color_list = ["#FFD635" , "#7EED56", "#00CCC0", "#51E9F4", "#94B3FF", "#000000", "#898D90", "#E46E6E", "#E4ABFF", "#FF99AA", "#FFB470", "#FFFFFF", "#BE0039", "#FF9600", "#00CC78", "#009EAA", "#3690EA", "#6A5CFF", "#B44AC0", "#FF3881", "#9C6926", "#6D001A", "#BF4300", "#00A368", "#00756F", "#2450A4", "#493AC1", "#811E9F", "#A00357", "#6D482F"]
         self.balance = 0
         self.checked = [False] * 5
         self.multi_thread = multi_thread
@@ -75,9 +75,11 @@ class Tapper:
             print(response.json())
             return None
 
-    def generate_random_color(self):
-   
-        return random.choice(self.color_list)
+    def generate_random_color(self, color):
+        a = random.choice(self.color_list)
+        while a == color:
+            a = random.choice(self.color_list)
+        return a
 
     def generate_random_pos(self):
         return randint(1, 1000000)
@@ -95,6 +97,7 @@ class Tapper:
 
     def repaint(self, session: requests.Session, chance_left):
         #  print("starting to paint")
+        data = self.get_cor(session)
         if settings.X3POINTS:
             data = self.get_cor(session)
             payload = {
@@ -102,7 +105,7 @@ class Tapper:
                 "pixelId": data[1]
             }
         else:
-            data = [str(self.generate_random_color()), int(self.generate_random_pos())]
+            data = [str(self.generate_random_color(data[0])), int(self.generate_random_pos())]
             payload = {
                 "newColor": data[0],
                 "pixelId": data[1]
@@ -129,7 +132,7 @@ class Tapper:
             }
             
         else:
-            data1 = [str(self.generate_random_color()), int(self.generate_random_pos())]
+            data1 = [str(self.generate_random_color(data[0])), int(self.generate_random_pos())]
             payload = {
                 "newColor": data1[0],
                 "pixelId": data[1]
@@ -140,7 +143,7 @@ class Tapper:
                 logger.success(
                     f"{self.session_name} | <green>Painted <cyan>{data[1]}</cyan> successfully new color: <cyan>{data[0]}</cyan> | Earned <light-blue>{int(response.json()['balance']) - self.balance}</light-blue> | Balace: <light-blue>{response.json()['balance']}</light-blue> | Repaint left: <yellow>{chance_left}</yellow></green>")
                 self.balance = int(response.json()['balance'])
-                data = self.get_cor(session)
+
             else:
                 logger.success(
                     f"{self.session_name} | <green>Painted <cyan>{data[1]}</cyan> successfully new color: <cyan>{data1[0]}</cyan> | Earned <light-blue>{int(response.json()['balance']) - self.balance}</light-blue> | Balace: <light-blue>{response.json()['balance']}</light-blue> | Repaint left: <yellow>{chance_left}</yellow></green>")
@@ -240,7 +243,7 @@ class Tapper:
                                     self.repaintV2(session, total_chance, i, data)
                                 else:
                                     self.repaint(session, total_chance)
-                                sleep_ = random.uniform(0.5, 0.8)
+                                sleep_ = random.uniform(0.2, 0.5)
                                 logger.info(f"{self.session_name} | Sleep <cyan>{sleep_}</cyan> before continue...")
                                 await asyncio.sleep(sleep_)
 
