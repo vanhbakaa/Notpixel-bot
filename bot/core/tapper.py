@@ -50,7 +50,7 @@ class Tapper:
         self.fromstart = 0
         self.checked = [False] * 9
         self.balance = 0
-        self.color_list = ["#E46E6E", "#FFD635" , "#7EED56", "#00CCC0", "#51E9F4", "#94B3FF", "#000000"]
+        self.color_list = ["#FFD635" , "#7EED56", "#00CCC0", "#51E9F4", "#94B3FF", "#000000"]
         self.multi_thread = multi_thread
         self.my_ref = "f6624523270"
 
