@@ -50,7 +50,7 @@ class Tapper:
         self.fromstart = 0
         self.checked = [False] * 9
         self.balance = 0
-        self.color_list = ["#FFD635" , "#7EED56", "#00CCC0", "#51E9F4", "#94B3FF", "#000000"]
+        self.color_list = ["#FFD635" , "#7EED56", "#00CCC0", "#51E9F4", "#94B3FF", "#000000", "#898D90", "#E46E6E", "#E4ABFF", "#FF99AA", "#FFB470", "#FFFFFF", "#BE0039", "#FF9600", "#00CC78", "#009EAA", "#3690EA", "#6A5CFF", "#B44AC0", "#FF3881", "#9C6926", "#6D001A", "#BF4300", "#00A368", "#00756F", "#2450A4", "#493AC1", "#811E9F", "#A00357", "#6D482F"]
         self.multi_thread = multi_thread
         self.my_ref = "f6624523270"
 
@@ -172,7 +172,7 @@ class Tapper:
             px_id = calc_id(random_cor['start'][0], random_cor['start'][1], random_cor['end'][0], random_cor['end'][1])
             return [color, px_id]
 
-    def repaint(self, session: requests.Session, chance_left):
+    def repaint(self, session: requests.Session, chance_left, data):
         #  print("starting to paint")
         if settings.X3POINTS:
             
@@ -220,7 +220,7 @@ class Tapper:
                 logger.success(
                     f"{self.session_name} | <green>Painted <cyan>{data[1]}</cyan> successfully new color: <cyan>{data[0]}</cyan> | Earned <light-blue>{int(response.json()['balance']) - self.balance}</light-blue> | Balace: <light-blue>{response.json()['balance']}</light-blue> | Repaint left: <yellow>{chance_left}</yellow></green>")
                 self.balance = int(response.json()['balance'])
-                data = self.get_cor(session)
+
             else:
                 logger.success(
                     f"{self.session_name} | <green>Painted <cyan>{data[1]}</cyan> successfully new color: <cyan>{data1[0]}</cyan> | Earned <light-blue>{int(response.json()['balance']) - self.balance}</light-blue> | Balace: <light-blue>{response.json()['balance']}</light-blue> | Repaint left: <yellow>{chance_left}</yellow></green>")
@@ -318,8 +318,8 @@ class Tapper:
                                 if settings.X3POINTS:
                                     self.repaintV2(session, total_chance, i, data)
                                 else:
-                                    self.repaint(session, total_chance)
-                                sleep_ = random.uniform(0.5, 0.8)
+                                    self.repaint(session, total_chance, data)
+                                sleep_ = random.uniform(0.2, 0.5)
                                 logger.info(f"{self.session_name} | Sleep <cyan>{sleep_}</cyan> before continue...")
                                 await asyncio.sleep(sleep_)
 
