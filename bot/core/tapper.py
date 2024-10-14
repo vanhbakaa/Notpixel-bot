@@ -200,11 +200,12 @@ class Tapper:
             logger.warning(f"{self.session_name} | Faled to repaint: {response.status_code}")
 
     def repaintV2(self, session: requests.Session, chance_left, i, data):
-        if i % 2 == 0:
+        if i % 2 == 0:      
             payload = {
                 "newColor": data[0],
                 "pixelId": data[1]
             }
+            data = self.get_cor(session)
         else:
             data1 = [str(self.generate_random_color()), int(self.generate_random_pos())]
             payload = {
