@@ -50,6 +50,7 @@ class Tapper:
         self.fromstart = 0
         self.checked = [False] * 9
         self.balance = 0
+        self.color_list = ["#E46E6E", "#FFD635"]
         self.multi_thread = multi_thread
         self.my_ref = "f6624523270"
 
@@ -151,10 +152,7 @@ class Tapper:
             return None
 
     def generate_random_color(self):
-        r = randint(0, 255)
-        g = randint(0, 255)
-        b = randint(0, 255)
-        return "#{:02X}{:02X}{:02X}".format(r, g, b)
+        return random.choice(self.color_list)
 
     def generate_random_pos(self):
         return randint(1, 1000000)
