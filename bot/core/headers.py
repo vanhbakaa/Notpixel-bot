@@ -1,11 +1,7 @@
 headers = {
     'Accept': '*/*',
     'Accept-Language': 'en-US',
-    'Content-Type': 'application/json',
     'Authorization': '',
-    'Cache-Control': 'no-cache',
-    'Pragma': 'no-cache',
-    'Priority': "u=1, i",
     'Origin': 'https://image.notpx.app',
     'Referer': 'https://image.notpx.app/',
     'Sec-Fetch-Dest': 'empty',
