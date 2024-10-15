@@ -343,7 +343,7 @@ class Tapper:
                     self.paintv2(session, curr_start_x + x, curr_start_y + y, image_hex_color.upper(), Total_attempt)
                     await asyncio.sleep(delay=random.randint(4, 10))
                 except Exception as e:
-                    if 'Gateway Timeout' in e:
+                    if 'Gateway Timeout' in str(e):
                         status_data = self.get_user_data(session)
 
                         if status_data:
@@ -371,7 +371,7 @@ class Tapper:
                         break
 
         except Exception as e:
-            if 'Gateway Timeout' in e:
+            if 'Gateway Timeout' in str(e):
                 logger.warning(f"{self.session_name} | <yellow>Server is not response.</yellow>")
             else:
                 logger.error(f"{self.session_name} | <red>Unknown error while painting: <light-yellow>{e}</light-yellow></red>")
