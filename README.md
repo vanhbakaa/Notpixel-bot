@@ -37,11 +37,14 @@
 |----------------------------|:-------------------------------------------------------------------------------------------------------------:|
 | **API_ID / API_HASH**      | Platform data from which to run the Telegram session (default - android)                                      |       
 | **REF_LINK**               | Put your ref link here (default: my ref link)                                                                 |
-| **X3POINTS** | Auto paint specific pixel to get 3x px (default: True)                                                                      |
 | **AUTO_TASK**              |  Auto do tasks (default: True)                                                                                  |
 | **AUTO_UPGRADE_PAINT_REWARD** | AUTO upgrade paint reward if possible (default: True)                                                                      |
 | **AUTO_UPGRADE_RECHARGE_SPEED** | AUTO upgrade recharge speed if possible (default: True)                                                                      |
 | **AUTO_UPGRADE_RECHARGE_ENERGY** | AUTO upgrade energy limit if possible (default: True)                                                                      |
+| **USE_CUSTOM_TEMPLATE** | Use custom template if it's disabled global template will be used (default: True)                                                    |
+| **CUSTOM_TEMPLATE_ID** | your custom template id (default: my template id)                                                                      |
+| **USE_RANDOM_TEMPLATES** | Option to use random templates on catalog (default: False)                                                                      |
+| **RANDOM_TEMPLATES_ID** |List of templates id (default: list of templates on catalog )                                                                      |
 | **NIGHT_MODE** | Sleep time for the bot (default: True)                                                                      |
 | **SLEEP_TIME** | Sleep in your timezone for the bot (default: [0, 7] 0am to 7am)                                                                     |
 | **SLEEP_BETWEEN_EACH_ROUND** | Sleep time in second between each round (default: [1000, 1500])                                                                     |
