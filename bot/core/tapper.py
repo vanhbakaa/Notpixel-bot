@@ -362,7 +362,7 @@ class Tapper:
                             logger.warning(
                                 f"{self.session_name} | server is not response. Go to sleep..")
                             break
-                    elif "Bad Request" in e:
+                    elif "Bad Request" in str(e):
                         logger.warning(
                             f" Go to sleep..")
                         break
