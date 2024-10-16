@@ -289,17 +289,18 @@ class Tapper:
             "pixelId": pxId,
             "newColor": color
         }
-
+        
         res = session.post("https://notpx.app/api/v1/repaint/start", headers=headers,
                            json=payload, verify=False)
         if res.status_code == 200:
             logger.success(
                 f"{self.session_name} | <green>Painted <cyan>{pxId}</cyan> successfully new color: <cyan>{color}</cyan> | Earned <light-blue>{round(int(res.json()['balance']) - self.balance)}</light-blue> | Balace: <light-blue>{res.json()['balance']}</light-blue> | Repaint left: <yellow>{chance_left}</yellow></green>")
             self.balance = int(res.json()['balance'])
+            return True
         else:
-            print(res.text)
             logger.warning(f"{self.session_name} | Faled to repaint: {res.status_code}")
-
+            return False
+            
 
     async def repaintV5(self, session: requests.Session, template_info):
         try:
@@ -333,14 +334,15 @@ class Tapper:
 
             while Total_attempt > 0:
                 try:
-                    x = randint(0, curr_image_size)
-                    y = randint(0, curr_image_size)
+                    x = randint(0, curr_image_size-5)
+                    y = randint(0, curr_image_size-5)
                     if Total_attempt == 0:
                         return
                     image_pixel = curr_image.getpixel((x, y))
                     image_hex_color = '#{:02x}{:02x}{:02x}'.format(*image_pixel)
                     Total_attempt -= 1
-                    self.paintv2(session, curr_start_x + x, curr_start_y + y, image_hex_color.upper(), Total_attempt)
+                    if self.paintv2(session, curr_start_x + x, curr_start_y + y, image_hex_color.upper(), Total_attempt) is False:
+                        return
                     await asyncio.sleep(delay=random.randint(4, 10))
                 except Exception as e:
                     if 'Gateway Timeout' in str(e):
@@ -403,7 +405,7 @@ class Tapper:
                 print(res.text)
                 raise Exception(f"Failed to download image from {url}, status: {res.status_code}")
         except Exception as e:
-            traceback.print_exc()
+            # traceback.print_exc()
             logger.error(f"{self.session_name} | Error while loading image from url: {url} | Error: {e}")
             return None
 
@@ -432,6 +434,7 @@ class Tapper:
                 if time_module.time() - access_token_created_time >= token_live_time:
                     tg_web_data = await self.get_tg_web_data(proxy=proxy)
                     headers['Authorization'] = f"initData {tg_web_data}"
+                    self.balance = 0
                     access_token_created_time = time_module.time()
                     token_live_time = randint(1000, 1500)
 
