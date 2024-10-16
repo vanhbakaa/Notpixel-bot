@@ -227,7 +227,7 @@ class Tapper:
                 f"{self.session_name} | <green>Painted <cyan>{pxId}</cyan> successfully new color: <cyan>{color}</cyan> | Earned <light-blue>{round(int(res.json()['balance']) - self.balance)}</light-blue> | Balace: <light-blue>{res.json()['balance']}</light-blue> | Repaint left: <yellow>{chance_left}</yellow></green>")
             self.balance = int(res.json()['balance'])
         else:
-            print(res.text)
+            # print(res.text)
             logger.warning(f"{self.session_name} | Faled to repaint: {res.status_code}")
 
     async def repaintV5(self, session: requests.Session, template_info):
@@ -262,8 +262,8 @@ class Tapper:
 
             while Total_attempt > 0:
                 try:
-                    x = randint(0, curr_image_size)
-                    y = randint(0, curr_image_size)
+                    x = randint(0, curr_image_size-5)
+                    y = randint(0, curr_image_size-5)
                     if Total_attempt == 0:
                         return
                     image_pixel = curr_image.getpixel((x, y))
