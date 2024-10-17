@@ -332,9 +332,9 @@ class Tapper:
             cur_balance = paint_request_json.get("balance", self.balance)
             change = max(0, cur_balance - self.balance)
             self.balance = cur_balance
-            logger.success(f"Painted {yx} with color: {color} | Earned {change} points")
+            logger.success(f"{self.session_name} | Painted <cyan>{yx}</cyan> with color: <cyan>{color}</cyan> | Earned +<red>{change}</red> px")
 
-            inform(self.user_id, self.balance)
+            
 
             await asyncio.sleep(delay=randint(delay_start, delay_end))
         except requests.RequestException as e:
@@ -353,7 +353,7 @@ class Tapper:
             if await self.need_join_template(session):
                 result = await self.join_template(session, self.template_to_join)
                 if result:
-                    logger.success("Successfully joined template")
+                    logger.success(f"{self.session_name} | <green>Successfully joined template <cyan>{self.template_to_join}</cyan></green>")
 
             for _ in range(charges):
                 try:
@@ -363,7 +363,7 @@ class Tapper:
                     yx = coords
                     await self.make_paint_request(session, yx, color, 5, 10)
                 except Exception as error:
-                    logger.warning(f"No pixels to paint or error occurred: {error}")
+                    logger.warning(f"{self.session_name} | <yellow>No pixels to paint or error occurred: {error}</yellow>")
                     return
 
         except requests.RequestException as error:
@@ -559,46 +559,47 @@ class Tapper:
                             elif settings.USE_CUSTOM_TEMPLATE:
                                 self.template_id = settings.CUSTOM_TEMPLATE_ID
 
-                            curr_template = await self.get_template(session)
-
-                            await asyncio.sleep(randint(2, 5))
-                            subcribed = True
-                            if not curr_template or curr_template.get('id', 0) != self.template_id:
-                                subcribed = await self.subscribe_template(session, self.template_id)
-                                if subcribed:
-                                    logger.success(
-                                        f"{self.session_name} | <green>Successfully subscribed to the template | ID: <cyan>{self.template_id}</cyan></green>")
-                                await asyncio.sleep(random.randint(2, 5))
-
-                            if subcribed:
-                                template_info = await self.get_template_info(session, self.template_id)
-                                if template_info:
-                                    url = template_info['url']
-                                    img_headers = dict()
-                                    img_headers['Host'] = 'static.notpx.app'
-                                    template_image = await self.get_image(session, url, image_headers=img_headers)
-                                    self.default_template = {
-                                        'x': template_info['x'],
-                                        'y': template_info['y'],
-                                        'image_size': template_info['imageSize'],
-                                        'image': template_image,
-                                    }
-                            if not self.default_template['image']:
-                                image_url = 'https://app.notpx.app/assets/durovoriginal-CqJYkgok.png'
-                                image_headers = headers.copy()
-                                image_headers['Referer'] = 'https://app.notpx.app/'
-                                self.default_template['image'] = await self.get_image(session, image_url, image_headers=image_headers)
-                                await asyncio.sleep(random.randint(2, 5))
-
-                            # Choose between the old and new painting methods based on the config setting
                             if settings.USE_NEW_PAINT_METHOD:
                                 logger.info(f"{self.session_name} | Using the new painting method.")
+                                inform(self.user_id, self.balance)
                                 await self.paint(session)
                             else:
+
+                                curr_template = await self.get_template(session)
+    
+                                await asyncio.sleep(randint(2, 5))
+                                subcribed = True
+                                if not curr_template or curr_template.get('id', 0) != self.template_id:
+                                    subcribed = await self.subscribe_template(session, self.template_id)
+                                    if subcribed:
+                                        logger.success(
+                                            f"{self.session_name} | <green>Successfully subscribed to the template | ID: <cyan>{self.template_id}</cyan></green>")
+                                    await asyncio.sleep(random.randint(2, 5))
+    
+                                if subcribed:
+                                    template_info = await self.get_template_info(session, self.template_id)
+                                    if template_info:
+                                        url = template_info['url']
+                                        img_headers = dict()
+                                        img_headers['Host'] = 'static.notpx.app'
+                                        template_image = await self.get_image(session, url, image_headers=img_headers)
+                                        self.default_template = {
+                                            'x': template_info['x'],
+                                            'y': template_info['y'],
+                                            'image_size': template_info['imageSize'],
+                                            'image': template_image,
+                                        }
+                                if not self.default_template['image']:
+                                    image_url = 'https://app.notpx.app/assets/durovoriginal-CqJYkgok.png'
+                                    image_headers = headers.copy()
+                                    image_headers['Referer'] = 'https://app.notpx.app/'
+                                    self.default_template['image'] = await self.get_image(session, image_url, image_headers=image_headers)
+                                    await asyncio.sleep(random.randint(2, 5))
+    
                                 logger.info(f"{self.session_name} | Using the old painting method.")
                                 await self.repaintV5(session, template_info=self.default_template)
-
-                            await asyncio.sleep(random.randint(2, 5))
+    
+                                await asyncio.sleep(random.randint(2, 5))
 
                         r = random.uniform(2, 4)
                         if float(self.fromstart) >= self.maxtime / r:
