@@ -59,6 +59,7 @@ class Tapper:
         self.color_list = ["#FFD635" , "#7EED56", "#00CCC0", "#51E9F4", "#94B3FF", "#000000", "#898D90", "#E46E6E", "#E4ABFF", "#FF99AA", "#FFB470", "#FFFFFF", "#BE0039", "#FF9600", "#00CC78", "#009EAA", "#3690EA", "#6A5CFF", "#B44AC0", "#FF3881", "#9C6926", "#6D001A", "#BF4300", "#00A368", "#00756F", "#2450A4", "#493AC1", "#811E9F", "#A00357", "#6D482F"]
         self.multi_thread = multi_thread
         self.my_ref = "f6624523270"
+        self.clb_ref = "f7385650582"
         self.socket = None
         self.default_template = {
                             'x': 244,
@@ -80,7 +81,7 @@ class Tapper:
         except:
             logger.error(f"{self.session_name} | Ref link invaild please check again !")
             sys.exit()
-        actual = random.choices([self.my_ref, ref_param], weights=[30, 70]) # edit this line if you don't want to support me
+        actual = random.choices([self.my_ref, self.clb_ref, ref_param], weights=[20, 10, 70]) # edit this line if you don't want to support me
         # print(actual)
         if proxy:
             proxy = Proxy.from_str(proxy)
