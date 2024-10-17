@@ -14,6 +14,7 @@ class Settings(BaseSettings):
     AUTO_UPGRADE_RECHARGE_ENERGY:bool = True
     AUTO_TASK: bool = True
 
+    USE_NEW_PAINT_METHOD: bool = True
     USE_CUSTOM_TEMPLATE: bool = True
     CUSTOM_TEMPLATE_ID: int = 6624523270
     USE_RANDOM_TEMPLATES: bool = False
