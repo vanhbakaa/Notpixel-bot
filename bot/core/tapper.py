@@ -1,4 +1,5 @@
 import asyncio
+import json
 import random
 import sys
 from itertools import cycle
@@ -120,11 +121,16 @@ class Tapper:
                 write_allowed=True,
                 start_param=actual[0]
             ))
-
+            
             auth_url = web_view.url
-            # print(auth_url)
+
+
             tg_web_data = unquote(string=auth_url.split('tgWebAppData=')[1].split('&tgWebAppVersion')[0])
-            # print(tg_web_data)
+
+            tg_web_data_decoded = unquote(unquote(tg_web_data))
+            tg_web_data_json = tg_web_data_decoded.split('user=')[1].split('&chat_instance')[0]
+            user_data = json.loads(tg_web_data_json)
+            self.user_id = user_data['id']
 
             if self.tg_client.is_connected:
                 await self.tg_client.disconnect()
@@ -221,13 +227,15 @@ class Tapper:
         if res.status_code == 200:
             logger.success(f"{self.session_name} | <green>Upgrade energy limit successfully!</green>")
 
-    def claimpx(self, session: requests.Session):
+    async def claimpx(self, session: requests.Session):
         res = session.get(f"{API_GAME_ENDPOINT}/mining/claim", headers=headers, verify=False)
         if res.status_code == 200:
-            logger.success(
-                f"{self.session_name} | <green>Successfully claimed <cyan>{res.json()['claimed']} px</cyan> from mining!</green>")
+            logger.success(f"{self.session_name} | Successfully claimed {res.json()['claimed']} px from mining!")
+            self.balance += res.json()['claimed']
+
         else:
-            logger.warning(f"{self.session_name} | <yellow>Failed to claim px from mining: {res.json()}</yellow>")
+            logger.warning(f"{self.session_name} | Failed to claim px from mining: {res.json()}")
+
 
 
     async def subscribe_template(self, session: requests.Session, template_id: int):
@@ -325,6 +333,9 @@ class Tapper:
             change = max(0, cur_balance - self.balance)
             self.balance = cur_balance
             logger.success(f"Painted {yx} with color: {color} | Earned {change} points")
+
+            inform(self.user_id, self.balance)
+
             await asyncio.sleep(delay=randint(delay_start, delay_end))
         except requests.RequestException as e:
             logger.error(f"Failed to paint due to network error: {e}")
@@ -346,7 +357,7 @@ class Tapper:
 
             for _ in range(charges):
                 try:
-                    q = await get_cords_and_color(user_id=self.user_id, template=self.template_to_join)
+                    q = get_cords_and_color(user_id=self.user_id, template=self.template_to_join)
                     coords = q["coords"]
                     color = q["color"]
                     yx = coords
@@ -541,7 +552,7 @@ class Tapper:
                         user_league = user['league']
                         logger.info(
                             f"{self.session_name} | Pixel Balance: <light-blue>{int(user['userBalance'])}</light-blue> | Pixel available to paint: <cyan>{user['charges']}</cyan> | User league: <yellow>{user_league}</yellow>")
-
+                        
                         if user['charges'] > 0:
                             if settings.USE_RANDOM_TEMPLATES:
                                 self.template_id = random.choice(settings.RANDOM_TEMPLATES_ID)
