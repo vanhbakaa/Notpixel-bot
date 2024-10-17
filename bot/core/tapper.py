@@ -227,10 +227,10 @@ class Tapper:
         if res.status_code == 200:
             logger.success(f"{self.session_name} | <green>Upgrade energy limit successfully!</green>")
 
-    async def claimpx(self, session: requests.Session):
+    def claimpx(self, session: requests.Session):
         res = session.get(f"{API_GAME_ENDPOINT}/mining/claim", headers=headers, verify=False)
         if res.status_code == 200:
-            logger.success(f"{self.session_name} | Successfully claimed {res.json()['claimed']} px from mining!")
+            logger.success(f"{self.session_name} | Successfully claimed <cyan>{res.json()['claimed']}</cyan> px from mining!")
             self.balance += res.json()['claimed']
 
         else:
@@ -332,7 +332,7 @@ class Tapper:
             cur_balance = paint_request_json.get("balance", self.balance)
             change = max(0, cur_balance - self.balance)
             self.balance = cur_balance
-            logger.success(f"{self.session_name} | Painted <cyan>{yx}</cyan> with color: <cyan>{color}</cyan> | Earned +<red>{change}</red> px")
+            logger.success(f"{self.session_name} | Painted <cyan>{yx}</cyan> with color: <cyan>{color}</cyan> | Earned +<red>{change}</red> px | Balance: <cyan>{self.balance}</cyan> px")
 
             
 
@@ -348,7 +348,7 @@ class Tapper:
             charges = stats_json.get('charges', 24)
             self.balance = stats_json.get('userBalance', 0)
             max_charges = stats_json.get('maxCharges', 24)
-            logger.info(f"Charges: {charges}/{max_charges}")
+            logger.info(f"{self.session_name} | Charges: <yellow>{charges}/{max_charges}</yellow>")
 
             if await self.need_join_template(session):
                 result = await self.join_template(session, self.template_to_join)
