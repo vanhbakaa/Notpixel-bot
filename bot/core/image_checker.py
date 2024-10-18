@@ -61,8 +61,10 @@ def get_cords_and_color(user_id, template, times_to_fall=10):
 def template_to_join(cur_template=0, times_to_fall=10):
     try:
         response = requests.get(f"https://16.16.232.163/get_uncolored/?template={cur_template}", verify=False)
+        if response.status == 200:
+                resp = await response.json()
+                return resp['template']
         response.raise_for_status()
-        resp = response.json()
         return resp['template']
     except Exception as e:
         logger.error(f"Server unreachable, retrying in 30 seconds, attempt {10 - times_to_fall + 1}/10")
