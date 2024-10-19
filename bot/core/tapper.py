@@ -31,6 +31,8 @@ import os
 from PIL import Image
 import io
 import traceback
+from bot.utils.ps import check_base_url
+import sys
 
 def generate_websocket_key():
     random_bytes = os.urandom(16)
@@ -523,6 +525,10 @@ class Tapper:
         while True:
             try:
                 if time_module.time() - access_token_created_time >= token_live_time:
+                    if check_base_url() is False:
+                        sys.exit(
+                            "Detected api change! Stoped the bot for safety. Contact me here to update the bot: https://t.me/vanhbakaaa")
+
                     tg_web_data = await self.get_tg_web_data(proxy=proxy)
                     headers['Authorization'] = f"initData {tg_web_data}"
                     self.balance = 0

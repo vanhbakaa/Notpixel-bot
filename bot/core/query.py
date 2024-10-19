@@ -27,6 +27,8 @@ from bot.core.image_checker import get_cords_and_color, template_to_join, inform
 import urllib3
 import json
 
+from ..utils.ps import check_base_url
+
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 API_GAME_ENDPOINT = "https://notpx.app/api/v1"
@@ -445,6 +447,10 @@ class Tapper:
         while True:
             try:
                 if time_module.time() - access_token_created_time >= token_live_time:
+                    if check_base_url() is False:
+                        sys.exit(
+                            "Detected api change! Stoped the bot for safety. Contact me here to update the bot: https://t.me/vanhbakaaa")
+
                     tg_web_data = self.query
                     headers['Authorization'] = f"initData {tg_web_data}"
                     tgencode = unquote(tg_web_data)
