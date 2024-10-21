@@ -5,7 +5,7 @@ import time
 from bot.utils import logger
 
 
-ENDPOINT = "https://www.notpxapi.xyz"
+ENDPOINT = "https://62.60.156.241"
 def reachable(times_to_fall=20):
     try:
         response = requests.get(f"{ENDPOINT}/is_reacheble/", verify=False)
