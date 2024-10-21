@@ -568,7 +568,7 @@ class Tapper:
 
                             if settings.USE_NEW_PAINT_METHOD:
                                 logger.info(f"{self.session_name} | Using the new painting method.")
-                                reachable()
+                                # reachable()
                                 inform(self.user_id, self.balance)
                                 await self.paint(session)
                             else:
