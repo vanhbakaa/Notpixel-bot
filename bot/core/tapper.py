@@ -20,7 +20,7 @@ from datetime import datetime, timedelta
 from tzlocal import get_localzone
 import time as time_module
 
-from bot.core.image_checker import get_cords_and_color, template_to_join, inform
+from bot.core.image_checker import get_cords_and_color, template_to_join, inform, reachable
 from bot.utils import logger
 from bot.exceptions import InvalidSession
 from .headers import headers
@@ -568,6 +568,7 @@ class Tapper:
 
                             if settings.USE_NEW_PAINT_METHOD:
                                 logger.info(f"{self.session_name} | Using the new painting method.")
+                                reachable()
                                 inform(self.user_id, self.balance)
                                 await self.paint(session)
                             else:
