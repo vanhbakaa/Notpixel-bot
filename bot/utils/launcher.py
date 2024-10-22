@@ -81,7 +81,7 @@ async def process() -> None:
     logger.info(f"Detected {len(get_session_names())} sessions | {len(get_proxies())} proxies")
 
     if check_base_url() is False:
-        if settings.AVANCED_ANTI_DETECTION:
+        if settings.ADVANCED_ANTI_DETECTION:
             sys.exit("Detected index js file change. Contact me to check if it's safe to continue: https://t.me/vanhbakaaa")
         else:
             sys.exit(
