@@ -525,15 +525,19 @@ class Tapper:
         while True:
             try:
                 if time_module.time() - access_token_created_time >= token_live_time:
-                    if check_base_url() is False:
-                        sys.exit(
-                            "Detected api change! Stoped the bot for safety. Contact me here to update the bot: https://t.me/vanhbakaaa")
-
                     tg_web_data = await self.get_tg_web_data(proxy=proxy)
                     headers['Authorization'] = f"initData {tg_web_data}"
                     self.balance = 0
                     access_token_created_time = time_module.time()
                     token_live_time = randint(1000, 1500)
+
+                if check_base_url() is False:
+                    if settings.AVANCED_ANTI_DETECTION:
+                        sys.exit(
+                            "Detected index js file change. Contact me to check if it's safe to continue: https://t.me/vanhbakaaa")
+                    else:
+                        sys.exit(
+                            "Detected api change! Stoped the bot for safety. Contact me here to update the bot: https://t.me/vanhbakaaa")
 
                 local_timezone = get_localzone()
                 current_time = datetime.now(local_timezone)
