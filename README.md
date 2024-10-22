@@ -49,7 +49,7 @@
 | **SLEEP_TIME** | Sleep in your timezone for the bot (default: [0, 7] 0am to 7am)                                                                     |
 | **DELAY_EACH_ACCOUNT** | Sleep time in second between each account(non multi thread) (default: [10, 15])                                                                     |
 | **SLEEP_BETWEEN_EACH_ROUND** | Sleep time in second between each round (default: [1000, 1500])                                                                     |
-| **ADVANCED_ANTI_DETECTION** | More protection for your account ;-;(default: False)                                                                     |
+| **ADVANCED_ANTI_DETECTION** | More protection for your account ;-; (default: False)                                                                     |
 | **USE_PROXY_FROM_FILE**    | Whether to use a proxy from the bot/config/proxies.txt file (True / False)                                    |
 
 
