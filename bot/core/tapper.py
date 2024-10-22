@@ -282,8 +282,8 @@ class Tapper:
         for attempts in range(3):
             try:
                 res = session.get(f'{API_GAME_ENDPOINT}/image/template/{template_id}',
-                                                headers = headers,
-                                                verify=False)
+                                                headers = headers)
+                                                
                 data = res.json()
 
                 return data
