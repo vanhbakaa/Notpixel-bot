@@ -5,6 +5,7 @@ from itertools import cycle
 from urllib.parse import unquote
 
 import aiohttp
+import cloudscraper
 import requests
 from aiocfscrape import CloudflareScraper
 from aiohttp_proxy import ProxyConnector
@@ -76,8 +77,8 @@ class Tapper:
             logger.error(f"{self.session_name} | Proxy: {proxy} | Error: {error}")
             return False
 
-    def login(self, session: requests.Session):
-        response = session.get(f"{API_GAME_ENDPOINT}/users/me", headers=headers, verify=False)
+    def login(self, session):
+        response = session.get(f"{API_GAME_ENDPOINT}/users/me", headers=headers)
         if response.status_code == 200:
             logger.success(f"{self.session_name} | <green>Logged in.</green>")
             return True
@@ -86,8 +87,8 @@ class Tapper:
             logger.warning("{self.session_name} | <red>Failed to login</red>")
             return False
 
-    def get_user_data(self, session: requests.Session):
-        response = session.get(f"{API_GAME_ENDPOINT}/mining/status", headers=headers, verify=False)
+    def get_user_data(self, session):
+        response = session.get(f"{API_GAME_ENDPOINT}/mining/status", headers=headers)
         if response.status_code == 200:
             return response.json()
         else:
@@ -103,7 +104,7 @@ class Tapper:
     def generate_random_pos(self):
         return randint(1, 1000000)
 
-    def repaintV2(self, session: requests.Session, chance_left, i, data):
+    def repaintV2(self, session, chance_left, i, data):
         if i % 2 == 0:
             payload = {
                 "newColor": data[0],
@@ -116,7 +117,7 @@ class Tapper:
                 "newColor": data1[0],
                 "pixelId": data[1]
             }
-        response = session.post(f"{API_GAME_ENDPOINT}/repaint/start", headers=headers, json=payload, verify=False)
+        response = session.post(f"{API_GAME_ENDPOINT}/repaint/start", headers=headers, json=payload)
         if response.status_code == 200:
             if i % 2 == 0:
                 logger.success(
@@ -131,25 +132,25 @@ class Tapper:
             print(response.text)
             logger.warning(f"{self.session_name} | Faled to repaint: {response.status_code}")
 
-    async def auto_upgrade_paint(self, session: requests.Session):
-        res = session.get(f"{API_GAME_ENDPOINT}/mining/boost/check/paintReward", headers=headers, verify=False)
+    async def auto_upgrade_paint(self, session):
+        res = session.get(f"{API_GAME_ENDPOINT}/mining/boost/check/paintReward", headers=headers)
         if res.status_code == 200:
             logger.success(f"{self.session_name} | <green>Upgrade paint reward successfully!</green>")
         await asyncio.sleep(random.uniform(2, 4))
 
-    async def auto_upgrade_recharge_speed(self, session: requests.Session):
-        res = session.get(f"{API_GAME_ENDPOINT}/mining/boost/check/reChargeSpeed", headers=headers, verify=False)
+    async def auto_upgrade_recharge_speed(self, session):
+        res = session.get(f"{API_GAME_ENDPOINT}/mining/boost/check/reChargeSpeed", headers=headers)
         if res.status_code == 200:
             logger.success(f"{self.session_name} | <green>Upgrade recharging speed successfully!</green>")
         await asyncio.sleep(random.uniform(2, 4))
 
-    async def auto_upgrade_energy_limit(self, session: requests.Session):
-        res = session.get(f"{API_GAME_ENDPOINT}/mining/boost/check/energyLimit", headers=headers, verify=False)
+    async def auto_upgrade_energy_limit(self, session):
+        res = session.get(f"{API_GAME_ENDPOINT}/mining/boost/check/energyLimit", headers=headers)
         if res.status_code == 200:
             logger.success(f"{self.session_name} | <green>Upgrade energy limit successfully!</green>")
 
-    def claimpx(self, session: requests.Session):
-        res = session.get(f"{API_GAME_ENDPOINT}/mining/claim", headers=headers, verify=False)
+    def claimpx(self, session):
+        res = session.get(f"{API_GAME_ENDPOINT}/mining/claim", headers=headers)
         if res.status_code == 200:
             logger.success(
                 f"{self.session_name} | Successfully claimed <cyan>{res.json()['claimed']}</cyan> px from mining!")
@@ -158,12 +159,11 @@ class Tapper:
         else:
             logger.warning(f"{self.session_name} | Failed to claim px from mining: {res.json()}")
 
-    async def subscribe_template(self, session: requests.Session, template_id: int):
+    async def subscribe_template(self, session, template_id: int):
         for attempt in range(3):
             try:
 
-                resp = session.put(f'{API_GAME_ENDPOINT}/image/template/subscribe/{template_id}', headers=headers,
-                                   verify=False)
+                resp = session.put(f'{API_GAME_ENDPOINT}/image/template/subscribe/{template_id}', headers=headers)
 
                 if resp.status_code == 200 or resp.status_code == 204:
                     logger.success(
@@ -180,10 +180,10 @@ class Tapper:
                     logger.error(
                         f"{self.session_name} | <red>Unknown error while subscribing to template {template_id}: <light-yellow>{e}</light-yellow> </red>")
 
-    async def get_template(self, session: requests.Session):
+    async def get_template(self, session):
         for attempts in range(3):
             try:
-                res = session.get(f'{API_GAME_ENDPOINT}/image/template/my', headers=headers, verify=False)
+                res = session.get(f'{API_GAME_ENDPOINT}/image/template/my', headers=headers)
 
                 if res.status_code == 200:
                     return res.json()
@@ -199,7 +199,7 @@ class Tapper:
                     return None
         return None
 
-    async def get_template_info(self, session: requests.Session, template_id: int):
+    async def get_template_info(self, session, template_id: int):
         for attempts in range(3):
             try:
                 res = session.get(f'{API_GAME_ENDPOINT}/image/template/{template_id}',
@@ -295,7 +295,7 @@ class Tapper:
                 await asyncio.sleep(10)
                 await self.paint(session, retries=retries - 1)
 
-    def paintv2(self, session: requests.Session, x, y, color, chance_left):
+    def paintv2(self, session, x, y, color, chance_left):
         pxId = y * 1000 + x + 1
         payload = {
             "pixelId": pxId,
@@ -303,7 +303,7 @@ class Tapper:
         }
 
         res = session.post(f"{API_GAME_ENDPOINT}/repaint/start", headers=headers,
-                           json=payload, verify=False)
+                           json=payload)
         if res.status_code == 200:
             logger.success(
                 f"{self.session_name} | <green>Painted <cyan>{pxId}</cyan> successfully new color: <cyan>{color}</cyan> | Earned <light-blue>{round(int(res.json()['balance']) - self.balance)}</light-blue> | Balace: <light-blue>{res.json()['balance']}</light-blue> | Repaint left: <yellow>{chance_left}</yellow></green>")
@@ -313,7 +313,7 @@ class Tapper:
             logger.warning(f"{self.session_name} | Faled to repaint: {res.status_code}")
             return False
 
-    async def repaintV5(self, session: requests.Session, template_info):
+    async def repaintV5(self, session, template_info):
         try:
             if not template_info:
                 return None
@@ -393,7 +393,7 @@ class Tapper:
                     f"{self.session_name} | <red>Unknown error while painting: <light-yellow>{e}</light-yellow></red>")
             await asyncio.sleep(random.randint(2, 5))
 
-    async def get_image(self, session: requests.Session, url, image_headers):
+    async def get_image(self, session, url, image_headers):
         image_filename = os.path.join(self.cache, url.split("/")[-1])
 
         try:
@@ -431,7 +431,7 @@ class Tapper:
         headers["User-Agent"] = generate_random_user_agent(device_type='android', browser_type='chrome')
         http_client = CloudflareScraper(headers=headers, connector=proxy_conn)
 
-        session = requests.Session()
+        session = cloudscraper.create_scraper()
 
         if proxy:
             proxy_check = await self.check_proxy(http_client=http_client, proxy=proxy)
@@ -449,14 +449,10 @@ class Tapper:
                 if time_module.time() - access_token_created_time >= token_live_time:
                     tg_web_data = self.query
                     headers['Authorization'] = f"initData {tg_web_data}"
-                    tgencode = unquote(tg_web_data)
-                    tgjson = tgencode.split('user=')[1].split('&chat_instance')[0]
-                    user_data = json.loads(tgjson)
-                    self.user_id = user_data['id']
                     self.balance = 0
                     access_token_created_time = time_module.time()
                     token_live_time = randint(1000, 1500)
-                    
+
                 if check_base_url() is False:
                     if settings.ADVANCED_ANTI_DETECTION:
                         sys.exit(
@@ -464,7 +460,6 @@ class Tapper:
                     else:
                         sys.exit(
                             "Detected api change! Stoped the bot for safety. Contact me here to update the bot: https://t.me/vanhbakaaa")
-
 
                 local_timezone = get_localzone()
                 current_time = datetime.now(local_timezone)
@@ -499,6 +494,7 @@ class Tapper:
 
                             if settings.USE_NEW_PAINT_METHOD:
                                 logger.info(f"{self.session_name} | Using the new painting method.")
+                                # reachable()
                                 inform(self.user_id, self.balance)
                                 await self.paint(session)
                             else:
@@ -545,46 +541,43 @@ class Tapper:
                             self.claimpx(session)
                             await asyncio.sleep(random.uniform(2, 5))
                         if settings.AUTO_TASK:
-                            res = session.get(f"{API_GAME_ENDPOINT}/mining/task/check/x?name=notpixel", headers=headers,
-                                              verify=False)
+                            res = session.get(f"{API_GAME_ENDPOINT}/mining/task/check/x?name=notpixel", headers=headers)
                             if res.status_code == 200 and res.json()['x:notpixel'] and self.checked[1] is False:
                                 self.checked[1] = True
                                 logger.success("<green>Task Not pixel on x completed!</green>")
-                            res = session.get(f"{API_GAME_ENDPOINT}/mining/task/check/x?name=notcoin", headers=headers,
-                                              verify=False)
+                            res = session.get(f"{API_GAME_ENDPOINT}/mining/task/check/x?name=notcoin", headers=headers)
                             if res.status_code == 200 and res.json()['x:notcoin'] and self.checked[2] is False:
                                 self.checked[2] = True
                                 logger.success("<green>Task Not coin on x completed!</green>")
-                            res = session.get(f"{API_GAME_ENDPOINT}/mining/task/check/paint20pixels", headers=headers,
-                                              verify=False)
+                            res = session.get(f"{API_GAME_ENDPOINT}/mining/task/check/paint20pixels", headers=headers)
                             if res.status_code == 200 and res.json()['paint20pixels'] and self.checked[3] is False:
                                 self.checked[3] = True
                                 logger.success("<green>Task paint 20 pixels completed!</green>")
 
                             if repaints >= 2049:
                                 res = session.get(f"{API_GAME_ENDPOINT}/mining/task/check/leagueBonusPlatinum",
-                                                  headers=headers, verify=False)
+                                                  headers=headers)
                                 if res.status_code == 200 and res.json()['leagueBonusPlatinum'] and self.checked[
                                     8] is False:
                                     self.checked[8] = True
                                     logger.success("<green>Upgraded to Plantium league!</green>")
                             if repaints >= 129:
                                 res = session.get(f"{API_GAME_ENDPOINT}/mining/task/check/leagueBonusGold",
-                                                  headers=headers, verify=False)
+                                                  headers=headers)
                                 if res.status_code == 200 and res.json()['leagueBonusGold'] and self.checked[
                                     7] is False:
                                     self.checked[7] = True
                                     logger.success("<green>Upgraded to Gold league!</green>")
                             if repaints >= 9:
                                 res = session.get(f"{API_GAME_ENDPOINT}/mining/task/check/leagueBonusSilver",
-                                                  headers=headers, verify=False)
+                                                  headers=headers)
                                 if res.status_code == 200 and res.json()['leagueBonusSilver'] and self.checked[
                                     6] is False:
                                     self.checked[6] = True
                                     logger.success("<green>Upgraded to Silver league!</green>")
 
                             res = session.get(f"{API_GAME_ENDPOINT}/mining/task/check/leagueBonusBronze",
-                                              headers=headers, verify=False)
+                                              headers=headers)
                             if res.status_code == 200 and res.json()['leagueBonusBronze'] and self.checked[5] is False:
                                 self.checked[5] = True
                                 logger.success(f"{self.session_name} | <green>Upgraded to Bronze league!</green>")
