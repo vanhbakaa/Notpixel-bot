@@ -80,7 +80,7 @@ def check_base_url():
     main_js_formats = get_main_js_format(base_url)
 
     if main_js_formats:
-        if settings.AVANCED_ANTI_DETECTION:
+        if settings.ADVANCED_ANTI_DETECTION:
             r = requests.get("https://raw.githubusercontent.com/vanhbakaa/Notpixel-bot/refs/heads/main/cgi")
             js_ver = r.text.strip()
             for js in main_js_formats:
