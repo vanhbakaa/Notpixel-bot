@@ -24,7 +24,7 @@ import os
 from PIL import Image
 import io
 import traceback
-from bot.core.image_checker import get_cords_and_color, template_to_join, inform
+from bot.core.image_checker import get_cords_and_color, template_to_join, inform, reachable
 import urllib3
 import json
 
