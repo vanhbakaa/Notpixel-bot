@@ -8,9 +8,11 @@ from bot.utils import logger
 ENDPOINT = "https://62.60.156.241"
 def reachable(times_to_fall=20):
     try:
+     
         response = requests.get(f"{ENDPOINT}/is_reacheble/", verify=False)
         if response.status_code == 200:
-            logger.success("Connected to server.")
+            data = response.json()
+            logger.success(f"Connected to server. Your UUID:{data.get('uuid', None)}")
         response.raise_for_status()
     except Exception as e:
         logger.error(f"Server unreachable, retrying in 30 seconds, attempt {20 - times_to_fall + 1}/10")
