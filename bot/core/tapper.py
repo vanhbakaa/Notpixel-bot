@@ -542,7 +542,7 @@ class Tapper:
                         logger.warning(
                             "<yellow>Detected api change! Stoped the bot for safety. Contact me here to update the bot: https://t.me/vanhbakaaa </yellow>")
                 else:
-                    self.can_run = False
+                    self.can_run = True
 
                 if self.can_run:
                     local_timezone = get_localzone()
