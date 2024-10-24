@@ -70,6 +70,7 @@ class Tapper:
                             'image': None
         }
         self.template_id = None
+        self.can_run = True
         self.cache = os.path.join(os.getcwd(), "cache")
 
         self.template_to_join = 0
@@ -533,134 +534,139 @@ class Tapper:
 
                 if check_base_url() is False:
                     if settings.ADVANCED_ANTI_DETECTION:
-                        sys.exit(
-                            "Detected index js file change. Contact me to check if it's safe to continue: https://t.me/vanhbakaaa")
+                        self.can_run = False
+                        logger.warning(
+                            "<yellow>Detected index js file change. Contact me to check if it's safe to continue: https://t.me/vanhbakaaa </yellow>")
                     else:
-                        sys.exit(
-                            "Detected api change! Stoped the bot for safety. Contact me here to update the bot: https://t.me/vanhbakaaa")
+                        self.can_run = False
+                        logger.warning(
+                            "<yellow>Detected api change! Stoped the bot for safety. Contact me here to update the bot: https://t.me/vanhbakaaa </yellow>")
+                else:
+                    self.can_run = False
 
-                local_timezone = get_localzone()
-                current_time = datetime.now(local_timezone)
-                start_time = current_time.replace(hour=settings.SLEEP_TIME[0], minute=0, second=0, microsecond=0)
-                end_time = current_time.replace(hour=settings.SLEEP_TIME[1], minute=0, second=0, microsecond=0)
+                if self.can_run:
+                    local_timezone = get_localzone()
+                    current_time = datetime.now(local_timezone)
+                    start_time = current_time.replace(hour=settings.SLEEP_TIME[0], minute=0, second=0, microsecond=0)
+                    end_time = current_time.replace(hour=settings.SLEEP_TIME[1], minute=0, second=0, microsecond=0)
 
-                if end_time < start_time:
-                    end_time += timedelta(days=1)
+                    if end_time < start_time:
+                        end_time += timedelta(days=1)
 
-                if settings.NIGHT_MODE and (start_time <= current_time <= end_time):
-                    time_to_sleep = (end_time - current_time).total_seconds()
-                    logger.info(f"{self.session_name} | Sleeping for {time_to_sleep} seconds until {end_time}.")
-                    await asyncio.sleep(time_to_sleep)
+                    if settings.NIGHT_MODE and (start_time <= current_time <= end_time):
+                        time_to_sleep = (end_time - current_time).total_seconds()
+                        logger.info(f"{self.session_name} | Sleeping for {time_to_sleep} seconds until {end_time}.")
+                        await asyncio.sleep(time_to_sleep)
 
-                elif self.login(session):
-                    user = self.get_user_data(session)
+                    elif self.login(session):
+                        user = self.get_user_data(session)
 
-                    if user:
-                        self.maxtime = user['maxMiningTime']
-                        self.fromstart = user['fromStart']
-                        self.balance = int(user['userBalance'])
-                        repaints = int(user['repaintsTotal'])
-                        user_league = user['league']
-                        logger.info(
-                            f"{self.session_name} | Pixel Balance: <light-blue>{int(user['userBalance'])}</light-blue> | Pixel available to paint: <cyan>{user['charges']}</cyan> | User league: <yellow>{user_league}</yellow>")
-                        
-                        if user['charges'] > 0:
-                            if settings.USE_RANDOM_TEMPLATES:
-                                self.template_id = random.choice(settings.RANDOM_TEMPLATES_ID)
-                            elif settings.USE_CUSTOM_TEMPLATE:
-                                self.template_id = settings.CUSTOM_TEMPLATE_ID
+                        if user:
+                            self.maxtime = user['maxMiningTime']
+                            self.fromstart = user['fromStart']
+                            self.balance = int(user['userBalance'])
+                            repaints = int(user['repaintsTotal'])
+                            user_league = user['league']
+                            logger.info(
+                                f"{self.session_name} | Pixel Balance: <light-blue>{int(user['userBalance'])}</light-blue> | Pixel available to paint: <cyan>{user['charges']}</cyan> | User league: <yellow>{user_league}</yellow>")
 
-                            if settings.USE_NEW_PAINT_METHOD:
-                                logger.info(f"{self.session_name} | Using the new painting method.")
-                                reachable()
-                                inform(self.user_id, self.balance)
-                                await self.paint(session)
-                            else:
+                            if user['charges'] > 0:
+                                if settings.USE_RANDOM_TEMPLATES:
+                                    self.template_id = random.choice(settings.RANDOM_TEMPLATES_ID)
+                                elif settings.USE_CUSTOM_TEMPLATE:
+                                    self.template_id = settings.CUSTOM_TEMPLATE_ID
 
-                                curr_template = await self.get_template(session)
-    
-                                await asyncio.sleep(randint(2, 5))
-                                subcribed = True
-                                if not curr_template or curr_template.get('id', 0) != self.template_id:
-                                    subcribed = await self.subscribe_template(session, self.template_id)
+                                if settings.USE_NEW_PAINT_METHOD:
+                                    logger.info(f"{self.session_name} | Using the new painting method.")
+                                    reachable()
+                                    inform(self.user_id, self.balance)
+                                    await self.paint(session)
+                                else:
+
+                                    curr_template = await self.get_template(session)
+
+                                    await asyncio.sleep(randint(2, 5))
+                                    subcribed = True
+                                    if not curr_template or curr_template.get('id', 0) != self.template_id:
+                                        subcribed = await self.subscribe_template(session, self.template_id)
+                                        if subcribed:
+                                            logger.success(
+                                                f"{self.session_name} | <green>Successfully subscribed to the template | ID: <cyan>{self.template_id}</cyan></green>")
+                                        await asyncio.sleep(random.randint(2, 5))
+
                                     if subcribed:
-                                        logger.success(
-                                            f"{self.session_name} | <green>Successfully subscribed to the template | ID: <cyan>{self.template_id}</cyan></green>")
+                                        template_info = await self.get_template_info(session, self.template_id)
+                                        if template_info:
+                                            url = template_info['url']
+                                            img_headers = dict()
+                                            img_headers['Host'] = 'static.notpx.app'
+                                            template_image = await self.get_image(session, url, image_headers=img_headers)
+                                            self.default_template = {
+                                                'x': template_info['x'],
+                                                'y': template_info['y'],
+                                                'image_size': template_info['imageSize'],
+                                                'image': template_image,
+                                            }
+                                    if not self.default_template['image']:
+                                        image_url = 'https://app.notpx.app/assets/durovoriginal-CqJYkgok.png'
+                                        image_headers = headers.copy()
+                                        image_headers['Referer'] = 'https://app.notpx.app/'
+                                        self.default_template['image'] = await self.get_image(session, image_url, image_headers=image_headers)
+                                        await asyncio.sleep(random.randint(2, 5))
+
+                                    logger.info(f"{self.session_name} | Using the old painting method.")
+                                    await self.repaintV5(session, template_info=self.default_template)
+
                                     await asyncio.sleep(random.randint(2, 5))
-    
-                                if subcribed:
-                                    template_info = await self.get_template_info(session, self.template_id)
-                                    if template_info:
-                                        url = template_info['url']
-                                        img_headers = dict()
-                                        img_headers['Host'] = 'static.notpx.app'
-                                        template_image = await self.get_image(session, url, image_headers=img_headers)
-                                        self.default_template = {
-                                            'x': template_info['x'],
-                                            'y': template_info['y'],
-                                            'image_size': template_info['imageSize'],
-                                            'image': template_image,
-                                        }
-                                if not self.default_template['image']:
-                                    image_url = 'https://app.notpx.app/assets/durovoriginal-CqJYkgok.png'
-                                    image_headers = headers.copy()
-                                    image_headers['Referer'] = 'https://app.notpx.app/'
-                                    self.default_template['image'] = await self.get_image(session, image_url, image_headers=image_headers)
-                                    await asyncio.sleep(random.randint(2, 5))
-    
-                                logger.info(f"{self.session_name} | Using the old painting method.")
-                                await self.repaintV5(session, template_info=self.default_template)
-    
-                                await asyncio.sleep(random.randint(2, 5))
 
-                        r = random.uniform(2, 4)
-                        if float(self.fromstart) >= self.maxtime / r:
-                            self.claimpx(session)
-                            await asyncio.sleep(random.uniform(2, 5))
-                        if settings.AUTO_TASK:
-                            res = session.get(f"{API_GAME_ENDPOINT}/mining/task/check/x?name=notpixel", headers=headers)
-                            if res.status_code == 200 and res.json()['x:notpixel'] and self.checked[1] is False:
-                                self.checked[1] = True
-                                logger.success("<green>Task Not pixel on x completed!</green>")
-                            res = session.get(f"{API_GAME_ENDPOINT}/mining/task/check/x?name=notcoin", headers=headers)
-                            if res.status_code == 200 and res.json()['x:notcoin'] and self.checked[2] is False:
-                                self.checked[2] = True
-                                logger.success("<green>Task Not coin on x completed!</green>")
-                            res = session.get(f"{API_GAME_ENDPOINT}/mining/task/check/paint20pixels", headers=headers)
-                            if res.status_code == 200 and res.json()['paint20pixels'] and self.checked[3] is False:
-                                self.checked[3] = True
-                                logger.success("<green>Task paint 20 pixels completed!</green>")
+                            r = random.uniform(2, 4)
+                            if float(self.fromstart) >= self.maxtime / r:
+                                self.claimpx(session)
+                                await asyncio.sleep(random.uniform(2, 5))
+                            if settings.AUTO_TASK:
+                                res = session.get(f"{API_GAME_ENDPOINT}/mining/task/check/x?name=notpixel", headers=headers)
+                                if res.status_code == 200 and res.json()['x:notpixel'] and self.checked[1] is False:
+                                    self.checked[1] = True
+                                    logger.success("<green>Task Not pixel on x completed!</green>")
+                                res = session.get(f"{API_GAME_ENDPOINT}/mining/task/check/x?name=notcoin", headers=headers)
+                                if res.status_code == 200 and res.json()['x:notcoin'] and self.checked[2] is False:
+                                    self.checked[2] = True
+                                    logger.success("<green>Task Not coin on x completed!</green>")
+                                res = session.get(f"{API_GAME_ENDPOINT}/mining/task/check/paint20pixels", headers=headers)
+                                if res.status_code == 200 and res.json()['paint20pixels'] and self.checked[3] is False:
+                                    self.checked[3] = True
+                                    logger.success("<green>Task paint 20 pixels completed!</green>")
 
-                            if repaints >= 2049:
-                                res = session.get(f"{API_GAME_ENDPOINT}/mining/task/check/leagueBonusPlatinum", headers=headers)
-                                if res.status_code == 200 and res.json()['leagueBonusPlatinum'] and self.checked[8] is False:
-                                    self.checked[8] = True
-                                    logger.success("<green>Upgraded to Plantium league!</green>")
-                            if repaints >= 129:
-                                res = session.get(f"{API_GAME_ENDPOINT}/mining/task/check/leagueBonusGold", headers=headers)
-                                if res.status_code == 200 and res.json()['leagueBonusGold'] and self.checked[7] is False:
-                                    self.checked[7] = True
-                                    logger.success("<green>Upgraded to Gold league!</green>")
-                            if repaints >= 9:
-                                res = session.get(f"{API_GAME_ENDPOINT}/mining/task/check/leagueBonusSilver", headers=headers)
-                                if res.status_code == 200 and res.json()['leagueBonusSilver'] and self.checked[6] is False:
-                                    self.checked[6] = True
-                                    logger.success("<green>Upgraded to Silver league!</green>")
+                                if repaints >= 2049:
+                                    res = session.get(f"{API_GAME_ENDPOINT}/mining/task/check/leagueBonusPlatinum", headers=headers)
+                                    if res.status_code == 200 and res.json()['leagueBonusPlatinum'] and self.checked[8] is False:
+                                        self.checked[8] = True
+                                        logger.success("<green>Upgraded to Plantium league!</green>")
+                                if repaints >= 129:
+                                    res = session.get(f"{API_GAME_ENDPOINT}/mining/task/check/leagueBonusGold", headers=headers)
+                                    if res.status_code == 200 and res.json()['leagueBonusGold'] and self.checked[7] is False:
+                                        self.checked[7] = True
+                                        logger.success("<green>Upgraded to Gold league!</green>")
+                                if repaints >= 9:
+                                    res = session.get(f"{API_GAME_ENDPOINT}/mining/task/check/leagueBonusSilver", headers=headers)
+                                    if res.status_code == 200 and res.json()['leagueBonusSilver'] and self.checked[6] is False:
+                                        self.checked[6] = True
+                                        logger.success("<green>Upgraded to Silver league!</green>")
 
-                            res = session.get(f"{API_GAME_ENDPOINT}/mining/task/check/leagueBonusBronze", headers=headers)
-                            if res.status_code == 200 and res.json()['leagueBonusBronze'] and self.checked[5] is False:
-                                self.checked[5] = True
-                                logger.success(f"{self.session_name} | <green>Upgraded to Bronze league!</green>")
+                                res = session.get(f"{API_GAME_ENDPOINT}/mining/task/check/leagueBonusBronze", headers=headers)
+                                if res.status_code == 200 and res.json()['leagueBonusBronze'] and self.checked[5] is False:
+                                    self.checked[5] = True
+                                    logger.success(f"{self.session_name} | <green>Upgraded to Bronze league!</green>")
 
-                        if settings.AUTO_UPGRADE_PAINT_REWARD:
-                            await self.auto_upgrade_paint(session)
-                        if settings.AUTO_UPGRADE_RECHARGE_SPEED:
-                            await self.auto_upgrade_recharge_speed(session)
-                        if settings.AUTO_UPGRADE_RECHARGE_ENERGY:
-                            await self.auto_upgrade_energy_limit(session)
+                            if settings.AUTO_UPGRADE_PAINT_REWARD:
+                                await self.auto_upgrade_paint(session)
+                            if settings.AUTO_UPGRADE_RECHARGE_SPEED:
+                                await self.auto_upgrade_recharge_speed(session)
+                            if settings.AUTO_UPGRADE_RECHARGE_ENERGY:
+                                await self.auto_upgrade_energy_limit(session)
 
-                    else:
-                        logger.warning(f"{self.session_name} | <yellow>Failed to get user data!</yellow>")
+                        else:
+                            logger.warning(f"{self.session_name} | <yellow>Failed to get user data!</yellow>")
                 if self.multi_thread:
                     sleep_ = randint(settings.SLEEP_TIME_BETWEEN_EACH_ROUND[0], settings.SLEEP_TIME_BETWEEN_EACH_ROUND[1])
                     logger.info(f"{self.session_name} | Sleep {sleep_}s...")
