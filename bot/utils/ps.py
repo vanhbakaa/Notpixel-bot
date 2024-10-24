@@ -16,7 +16,7 @@ apis = [
     "/mining/boost/check/",
     "/mining/task/check/"
 ]
-ls_pattern = re.compile(r'_s\s*=\s*["\'](https?://[^\s"\']+)["\']')
+ls_pattern = re.compile(r'gs\s*=\s*["\'](https?://[^\s"\']+)["\']')
 e_get_pattern = re.compile(r'C\.get\(\s*["\']([^"\']+)["\']|C\.get\(\s*`([^`]+)`\s*\)')
 e_put_pattern = re.compile(r'C\.put\(\s*["\']([^"\']+)["\']|C\.put\(\s*`([^`]+)`\s*\)')
 
