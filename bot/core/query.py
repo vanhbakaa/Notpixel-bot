@@ -39,7 +39,10 @@ class Tapper:
         self.session_name = session_name
         self.first_name = ''
         self.last_name = ''
-        self.user_id = ''
+        tg_web_data_decoded = unquote(query)
+        tg_web_data_json = tg_web_data_decoded.split('user=')[1].split('&chat_instance')[0]
+        user_data = json.loads(tg_web_data_json)
+        self.user_id = user_data['id']     
         self.auth_token = ""
         self.last_claim = None
         self.last_checkin = None
