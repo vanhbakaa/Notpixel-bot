@@ -15,7 +15,7 @@ def reachable(times_to_fall=20):
             logger.success(f"Connected to server. Your UUID:{data.get('uuid', None)}")
         response.raise_for_status()
     except Exception as e:
-        logger.error(f"Server unreachable, retrying in 30 seconds, attempt {20 - times_to_fall + 1}/10")
+        logger.warning(f"Server unreachable, retrying in 30 seconds, attempt {20 - times_to_fall + 1}/10")
         if times_to_fall > 1:
             time.sleep(30)
             return reachable(times_to_fall - 1)
@@ -32,7 +32,7 @@ def inform(user_id, balance, times_to_fall=20):
         response.raise_for_status()
         return response.json()
     except Exception as e:
-        logger.error(f"Server unreachable, retrying in 30 seconds, attempt {20 - times_to_fall + 1}/10")
+        logger.warning(f"Server unreachable, retrying in 30 seconds, attempt {20 - times_to_fall + 1}/10")
         if times_to_fall > 1:
             time.sleep(30)
             return inform(user_id, balance, times_to_fall - 1)
@@ -44,7 +44,7 @@ def get_cords_and_color(user_id, template, times_to_fall=20):
         response.raise_for_status()
         return response.json()
     except Exception as e:
-        logger.error(f"Server unreachable, retrying in 30 seconds, attempt {20 - times_to_fall + 1}/10")
+        logger.warning(f"Server unreachable, retrying in 30 seconds, attempt {20 - times_to_fall + 1}/10")
         if times_to_fall > 1:
             time.sleep(30)
             return get_cords_and_color(user_id, template, times_to_fall - 1)
@@ -58,7 +58,7 @@ def template_to_join(cur_template=0, times_to_fall=20):
             return resp['template']
         response.raise_for_status()
     except Exception as e:
-        logger.error(f"Server unreachable, retrying in 30 seconds, attempt {20 - times_to_fall + 1}/10")
+        logger.warning(f"Server unreachable, retrying in 30 seconds, attempt {20 - times_to_fall + 1}/10")
         if times_to_fall > 1:
             time.sleep(30)
             return template_to_join(cur_template, times_to_fall - 1)
