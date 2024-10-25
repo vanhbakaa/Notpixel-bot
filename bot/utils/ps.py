@@ -16,9 +16,10 @@ apis = [
     "/mining/boost/check/",
     "/mining/task/check/"
 ]
-ls_pattern = re.compile(r'gs\s*=\s*["\'](https?://[^\s"\']+)["\']')
-e_get_pattern = re.compile(r'C\.get\(\s*["\']([^"\']+)["\']|C\.get\(\s*`([^`]+)`\s*\)')
-e_put_pattern = re.compile(r'C\.put\(\s*["\']([^"\']+)["\']|C\.put\(\s*`([^`]+)`\s*\)')
+ls_pattern = re.compile(r'[a-zA-Z]+s\s*=\s*["\'](https?://[^\s"\']+)["\']')
+e_get_pattern = re.compile(r'[a-zA-Z]\.get\(\s*["\']([^"\']+)["\']|\(\s*`([^`]+)`\s*\)')
+e_put_pattern = re.compile(r'[a-zA-Z]\.put\(\s*["\']([^"\']+)["\']|\(\s*`([^`]+)`\s*\)')
+
 
 
 def clean_url(url):
