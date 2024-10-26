@@ -1,5 +1,5 @@
 @echo off
-title NotPixel
+
 if not exist venv (
     echo Creating virtual environment...
     python -m venv venv
@@ -29,9 +29,8 @@ if not exist .env (
 	echo Skipping .env copying
 )
 
-echo Starting the bot...
+:loop
 python main.py
-
-echo done
-echo PLEASE EDIT .ENV FILE
-pause
+echo Restarting the program in 2 seconds...
+timeout /t 2 /nobreak >nul
+goto :loop
