@@ -31,6 +31,7 @@
 | Auto UPGRADE                                                  |        ✅        |
 | Night mode                                                    |        ✅        |
 | Support for pyrogram .session / Query                         |        ✅        |
+| Telegram Bot for query id                                     |        ✅        |
 
 ## [Settings](https://github.com/vanhbakaa/Notpixel-bot/blob/main/.env-example)
 | Settings | Description |
@@ -51,6 +52,7 @@
 | **SLEEP_BETWEEN_EACH_ROUND** | Sleep time in second between each round (default: [1000, 1500])                                                                     |
 | **ADVANCED_ANTI_DETECTION** | More protection for your account ;-; (default: False)                                                                     |
 | **USE_PROXY_FROM_FILE**    | Whether to use a proxy from the bot/config/proxies.txt file (True / False)                                    |
+| **BOT_TOKEN**    | Get Bot Token from [@BotFather](https://t.me/BotFather) (default: )                                    |
 
 
 ## Quick Start
@@ -146,6 +148,18 @@ You can also use arguments for quick start, for example:
 # 1 - Run clicker
 # 2 - Creates a session 
 ```
+
+# To run with Telegram Bot
+```shell
+python3 -m venv venv
+source venv/bin/activate
+pip3 install -r requirements.txt
+cp .env-example .env
+nano .env
+npm install
+node index.js
+```
+
 # Support This Project
 
 If you'd like to support the development of this project, please consider making a donation. Every little bit helps!
