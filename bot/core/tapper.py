@@ -34,14 +34,17 @@ from bot.utils.ps import check_base_url
 import sys
 import cloudscraper
 
+
 def generate_websocket_key():
     random_bytes = os.urandom(16)
     websocket_key = base64.b64encode(random_bytes).decode('utf-8')
     return websocket_key
 
+
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 API_GAME_ENDPOINT = "https://notpx.app/api/v1"
+
 
 class Tapper:
     def __init__(self, tg_client: Client, multi_thread: bool):
@@ -58,16 +61,19 @@ class Tapper:
         self.fromstart = 0
         self.checked = [False] * 9
         self.balance = 0
-        self.color_list = ["#FFD635" , "#7EED56", "#00CCC0", "#51E9F4", "#94B3FF", "#000000", "#898D90", "#E46E6E", "#E4ABFF", "#FF99AA", "#FFB470", "#FFFFFF", "#BE0039", "#FF9600", "#00CC78", "#009EAA", "#3690EA", "#6A5CFF", "#B44AC0", "#FF3881", "#9C6926", "#6D001A", "#BF4300", "#00A368", "#00756F", "#2450A4", "#493AC1", "#811E9F", "#A00357", "#6D482F"]
+        self.color_list = ["#FFD635", "#7EED56", "#00CCC0", "#51E9F4", "#94B3FF", "#000000", "#898D90", "#E46E6E",
+                           "#E4ABFF", "#FF99AA", "#FFB470", "#FFFFFF", "#BE0039", "#FF9600", "#00CC78", "#009EAA",
+                           "#3690EA", "#6A5CFF", "#B44AC0", "#FF3881", "#9C6926", "#6D001A", "#BF4300", "#00A368",
+                           "#00756F", "#2450A4", "#493AC1", "#811E9F", "#A00357", "#6D482F"]
         self.multi_thread = multi_thread
         self.my_ref = "f6624523270"
         self.clb_ref = "f7385650582"
         self.socket = None
         self.default_template = {
-                            'x': 244,
-                            'y': 244,
-                            'image_size': 510,
-                            'image': None
+            'x': 244,
+            'y': 244,
+            'image_size': 510,
+            'image': None
         }
         self.template_id = None
         self.can_run = True
@@ -95,7 +101,8 @@ class Tapper:
         except:
             logger.error(f"{self.session_name} | Ref link invaild please check again !")
             sys.exit()
-        actual = random.choices([self.my_ref, self.clb_ref, ref_param], weights=[20, 10, 70]) # edit this line if you don't want to support me
+        actual = random.choices([self.my_ref, self.clb_ref, ref_param],
+                                weights=[20, 10, 70])  # edit this line if you don't want to support me
         # print(actual)
         if proxy:
             proxy = Proxy.from_str(proxy)
@@ -122,13 +129,8 @@ class Tapper:
                     peer = await self.tg_client.resolve_peer('notpixel')
                     break
                 except FloodWait as fl:
-                    fls = fl.value
 
                     logger.warning(f"<light-yellow>{self.session_name}</light-yellow> | FloodWait {fl}")
-                    logger.info(f"<light-yellow>{self.session_name}</light-yellow> | Sleep {fls}s")
-
-                    await asyncio.sleep(fls + 3)
-
             web_view = await self.tg_client.invoke(RequestAppWebView(
                 peer=peer,
                 app=InputBotAppShortName(bot_id=peer, short_name="app"),
@@ -136,9 +138,8 @@ class Tapper:
                 write_allowed=True,
                 start_param=actual[0]
             ))
-            
-            auth_url = web_view.url
 
+            auth_url = web_view.url
 
             tg_web_data = unquote(string=auth_url.split('tgWebAppData=')[1].split('&tgWebAppVersion')[0])
 
@@ -198,12 +199,12 @@ class Tapper:
         return randint(1, 1000000)
 
     def repaintV2(self, session, chance_left, i, data):
-        if i % 2 == 0:      
+        if i % 2 == 0:
             payload = {
                 "newColor": data[0],
                 "pixelId": data[1]
             }
-            
+
         else:
             data1 = [str(self.generate_random_color(data[0])), int(self.generate_random_pos())]
             payload = {
@@ -254,22 +255,22 @@ class Tapper:
     def claimpx(self, session):
         res = session.get(f"{API_GAME_ENDPOINT}/mining/claim", headers=headers)
         if res.status_code == 200:
-            logger.success(f"{self.session_name} | Successfully claimed <cyan>{res.json()['claimed']}</cyan> px from mining!")
+            logger.success(
+                f"{self.session_name} | Successfully claimed <cyan>{res.json()['claimed']}</cyan> px from mining!")
             self.balance += res.json()['claimed']
 
         else:
             logger.warning(f"{self.session_name} | Failed to claim px from mining: {res.json()}")
 
-
-
     async def subscribe_template(self, session, template_id: int):
         for attempt in range(3):
             try:
 
-                resp = session.put(f'{API_GAME_ENDPOINT}/image/template/subscribe/{template_id}',headers=headers)
+                resp = session.put(f'{API_GAME_ENDPOINT}/image/template/subscribe/{template_id}', headers=headers)
 
                 if resp.status_code == 200 or resp.status_code == 204:
-                    logger.success(f"{self.session_name} | <green>Started using template: <cyan>{template_id}</cyan></green>")
+                    logger.success(
+                        f"{self.session_name} | <green>Started using template: <cyan>{template_id}</cyan></green>")
                     return True
                 else:
                     print(resp.text)
@@ -279,7 +280,8 @@ class Tapper:
                     logger.warning(f"{self.session_name} | Attempt {attempt}: Connection timeout, retry after 3-5s...")
                     await asyncio.sleep(random.randint(3, 5))
                 else:
-                    logger.error(f"{self.session_name} | <red>Unknown error while subscribing to template {template_id}: <light-yellow>{e}</light-yellow> </red>")
+                    logger.error(
+                        f"{self.session_name} | <red>Unknown error while subscribing to template {template_id}: <light-yellow>{e}</light-yellow> </red>")
 
     async def get_template(self, session):
         for attempts in range(3):
@@ -295,16 +297,16 @@ class Tapper:
                     logger.warning(f"{self.session_name} | Attempt {attempts}: Connection timeout, retry after 3-5s...")
                     await asyncio.sleep(random.randint(3, 5))
                 else:
-                    logger.error(f"{self.session_name} | <red>Unknown error while getting template info: <light-yellow>{e}</light-yellow></red>")
+                    logger.error(
+                        f"{self.session_name} | <red>Unknown error while getting template info: <light-yellow>{e}</light-yellow></red>")
                     return None
         return None
 
-    async def get_template_info(self, session, template_id: int):
+    async def get_template_info(self, session):
         for attempts in range(3):
             try:
-                res = session.get(f'{API_GAME_ENDPOINT}/image/template/{template_id}',
-                                                headers = headers)
-                                                
+                res = session.get(f'https://notpx.app/api/v1/image/template/my',
+                                  headers=headers)
                 data = res.json()
 
                 return data
@@ -314,9 +316,9 @@ class Tapper:
                     await asyncio.sleep(random.randint(3, 5))
                     continue
                 else:
-                    logger.error(f"{self.session_name} | <red>Unknown error while getting template info: <light-yellow>{e}</light-yellow></red>")
+                    logger.error(
+                        f"{self.session_name} | <red>Unknown error while getting template info: <light-yellow>{e}</light-yellow></red>")
                     break
-
 
     async def notpx_template(self, session):
         try:
@@ -336,7 +338,6 @@ class Tapper:
             logger.error(f"Failed to determine template join requirement: {error}")
             return False
 
-
     async def join_template(self, session, template_id):
         try:
             resp = session.put(f"{API_GAME_ENDPOINT}/image/template/subscribe/{template_id}", headers=headers)
@@ -346,17 +347,17 @@ class Tapper:
             logger.error(f"Error joining template: {error}")
             return False
 
-
     async def make_paint_request(self, session, yx, color, delay_start, delay_end):
         try:
             paint_request = session.post(f'{API_GAME_ENDPOINT}/repaint/start',
-                                        json={"pixelId": int(yx), "newColor": color}, headers=headers)
+                                         json={"pixelId": int(yx), "newColor": color}, headers=headers)
             paint_request.raise_for_status()
             paint_request_json = paint_request.json()
             cur_balance = paint_request_json.get("balance", self.balance)
             change = max(0, cur_balance - self.balance)
             self.balance = cur_balance
-            logger.success(f"{self.session_name} | Painted <cyan>{yx}</cyan> with color: <cyan>{color}</cyan> | Earned +<red>{change}</red> px | Balance: <cyan>{self.balance}</cyan> px")
+            logger.success(
+                f"{self.session_name} | Painted <cyan>{yx}</cyan> with color: <cyan>{color}</cyan> | Earned +<red>{change}</red> px | Balance: <cyan>{self.balance}</cyan> px")
 
             await asyncio.sleep(delay=randint(delay_start, delay_end))
             return True
@@ -384,9 +385,11 @@ class Tapper:
             if await self.need_join_template(session):
                 result = await self.join_template(session, self.template_to_join)
                 if result:
-                    logger.success(f"{self.session_name} | <green>Successfully joined template <cyan>{self.template_to_join}</cyan></green>")
+                    logger.success(
+                        f"{self.session_name} | <green>Successfully joined template <cyan>{self.template_to_join}</cyan></green>")
                 else:
-                    logger.warning(f"{self.session_name} | <yellow>Failed to join template: {self.template_to_join}</yellow>")
+                    logger.warning(
+                        f"{self.session_name} | <yellow>Failed to join template: {self.template_to_join}</yellow>")
                     return
 
             for _ in range(charges):
@@ -399,7 +402,8 @@ class Tapper:
                     if a is False:
                         return
                 except Exception as error:
-                    logger.warning(f"{self.session_name} | <yellow>No pixels to paint or error occurred: {error}</yellow>")
+                    logger.warning(
+                        f"{self.session_name} | <yellow>No pixels to paint or error occurred: {error}</yellow>")
                     return
 
         except json.JSONDecodeError:
@@ -412,14 +416,13 @@ class Tapper:
                 logger.info(f"{self.session_name} | Retry after 10 seconds...")
                 await self.paint(session, retries=retries - 1)
 
-
     def paintv2(self, session, x, y, color, chance_left):
-        pxId = y * 1000 + x +1
+        pxId = y * 1000 + x + 1
         payload = {
             "pixelId": pxId,
             "newColor": color
         }
-        
+
         res = session.post(f"{API_GAME_ENDPOINT}/repaint/start", headers=headers,
                            json=payload)
         if res.status_code == 200:
@@ -430,7 +433,6 @@ class Tapper:
         else:
             logger.warning(f"{self.session_name} | Faled to repaint: {res.status_code}")
             return False
-            
 
     async def repaintV5(self, session, template_info):
         try:
@@ -464,14 +466,15 @@ class Tapper:
 
             while Total_attempt > 0:
                 try:
-                    x = randint(0, curr_image_size-5)
-                    y = randint(0, curr_image_size-5)
+                    x = randint(0, curr_image_size - 5)
+                    y = randint(0, curr_image_size - 5)
                     if Total_attempt == 0:
                         return
                     image_pixel = curr_image.getpixel((x, y))
                     image_hex_color = '#{:02x}{:02x}{:02x}'.format(*image_pixel)
                     Total_attempt -= 1
-                    if self.paintv2(session, curr_start_x + x, curr_start_y + y, image_hex_color.upper(), Total_attempt) is False:
+                    if self.paintv2(session, curr_start_x + x, curr_start_y + y, image_hex_color.upper(),
+                                    Total_attempt) is False:
                         return
                     await asyncio.sleep(delay=random.randint(4, 10))
                 except Exception as e:
@@ -499,14 +502,16 @@ class Tapper:
                             f" Go to sleep..")
                         break
                     else:
-                        logger.error(f"{self.session_name} | <red>Unknown error while painting: <light-yellow>{e}</light-yellow></red>")
+                        logger.error(
+                            f"{self.session_name} | <red>Unknown error while painting: <light-yellow>{e}</light-yellow></red>")
                         break
 
         except Exception as e:
             if 'Gateway Timeout' in str(e):
                 logger.warning(f"{self.session_name} | <yellow>Server is not response.</yellow>")
             else:
-                logger.error(f"{self.session_name} | <red>Unknown error while painting: <light-yellow>{e}</light-yellow></red>")
+                logger.error(
+                    f"{self.session_name} | <red>Unknown error while painting: <light-yellow>{e}</light-yellow></red>")
             await asyncio.sleep(random.randint(2, 5))
 
     async def get_image(self, session, url, image_headers):
@@ -519,21 +524,31 @@ class Tapper:
                 img.load()
                 return img
         except Exception as e:
-            logger.error(f"{self.session_name} | <red>Failed to load image from file: {image_filename} | Error: {e} <red>")
+            logger.error(
+                f"{self.session_name} | <red>Failed to load image from file: {image_filename} | Error: {e} <red>")
 
         try:
             logger.info(f"{self.session_name} | Downloading image from server...")
-            res = session.get(url, headers=image_headers)
+            if "https://fra1.digitaloceanspaces.com/" in url:
+                response = requests.get(url, stream=True)
 
-            if res.status_code == 200:
-                img_data = res.content
-                img = Image.open(io.BytesIO(img_data))
-
-                img.save(image_filename)
-                return img
+                # Check if the request was successful
+                if response.status_code == 200:
+                    with open(image_filename, "wb") as file:
+                        for chunk in response.iter_content(1024):
+                            file.write(chunk)
             else:
-                print(res.text)
-                raise Exception(f"Failed to download image from {url}, status: {res.status_code}")
+                res = session.get(url, headers=image_headers)
+
+                if res.status_code == 200:
+                    img_data = res.content
+                    img = Image.open(io.BytesIO(img_data))
+
+                    img.save(image_filename)
+                    return img
+                else:
+                    print(res.text)
+                    raise Exception(f"Failed to download image from {url}, status: {res.status_code}")
         except Exception as e:
             # traceback.print_exc()
             logger.error(f"{self.session_name} | Error while loading image from url: {url} | Error: {e}")
@@ -632,12 +647,14 @@ class Tapper:
                                         await asyncio.sleep(random.randint(2, 5))
 
                                     if subcribed:
-                                        template_info = await self.get_template_info(session, self.template_id)
+                                        template_info = await self.get_template_info(session)
+                                        # print(template_info)
                                         if template_info:
                                             url = template_info['url']
                                             img_headers = dict()
                                             img_headers['Host'] = 'static.notpx.app'
-                                            template_image = await self.get_image(session, url, image_headers=img_headers)
+                                            template_image = await self.get_image(session, url,
+                                                                                  image_headers=img_headers)
                                             self.default_template = {
                                                 'x': template_info['x'],
                                                 'y': template_info['y'],
@@ -645,10 +662,11 @@ class Tapper:
                                                 'image': template_image,
                                             }
                                     if not self.default_template['image']:
-                                        image_url = 'https://app.notpx.app/assets/dungeon_4-B7Qp6JGr.png'
+                                        image_url = 'https://app.notpx.app/assets/dungeon_2-Di8XeQU7.png'
                                         image_headers = headers.copy()
                                         image_headers['Referer'] = 'https://app.notpx.app/'
-                                        self.default_template['image'] = await self.get_image(session, image_url, image_headers=image_headers)
+                                        self.default_template['image'] = await self.get_image(session, image_url,
+                                                                                              image_headers=image_headers)
                                         await asyncio.sleep(random.randint(2, 5))
 
                                     logger.info(f"{self.session_name} | Using the old painting method.")
@@ -661,37 +679,50 @@ class Tapper:
                                 self.claimpx(session)
                                 await asyncio.sleep(random.uniform(2, 5))
                             if settings.AUTO_TASK:
-                                res = session.get(f"{API_GAME_ENDPOINT}/mining/task/check/x?name=notpixel", headers=headers)
+                                res = session.get(f"{API_GAME_ENDPOINT}/mining/task/check/x?name=notpixel",
+                                                  headers=headers)
                                 if res.status_code == 200 and res.json()['x:notpixel'] and self.checked[1] is False:
                                     self.checked[1] = True
                                     logger.success("<green>Task Not pixel on x completed!</green>")
-                                res = session.get(f"{API_GAME_ENDPOINT}/mining/task/check/x?name=notcoin", headers=headers)
+                                res = session.get(f"{API_GAME_ENDPOINT}/mining/task/check/x?name=notcoin",
+                                                  headers=headers)
                                 if res.status_code == 200 and res.json()['x:notcoin'] and self.checked[2] is False:
                                     self.checked[2] = True
                                     logger.success("<green>Task Not coin on x completed!</green>")
-                                res = session.get(f"{API_GAME_ENDPOINT}/mining/task/check/paint20pixels", headers=headers)
+                                res = session.get(f"{API_GAME_ENDPOINT}/mining/task/check/paint20pixels",
+                                                  headers=headers)
                                 if res.status_code == 200 and res.json()['paint20pixels'] and self.checked[3] is False:
                                     self.checked[3] = True
                                     logger.success("<green>Task paint 20 pixels completed!</green>")
 
                                 if repaints >= 2049:
-                                    res = session.get(f"{API_GAME_ENDPOINT}/mining/task/check/leagueBonusPlatinum", headers=headers)
-                                    if res.status_code == 200 and res.json()['leagueBonusPlatinum'] and self.checked[8] is False:
+                                    res = session.get(f"{API_GAME_ENDPOINT}/mining/task/check/leagueBonusPlatinum",
+                                                      headers=headers)
+                                    if res.status_code == 200 and res.json()['leagueBonusPlatinum'] and self.checked[
+                                        8] is False:
                                         self.checked[8] = True
-                                        logger.success(f"{self.session_name} | <green>Upgraded to Plantium league!</green>")
+                                        logger.success(
+                                            f"{self.session_name} | <green>Upgraded to Plantium league!</green>")
                                 if repaints >= 129:
-                                    res = session.get(f"{API_GAME_ENDPOINT}/mining/task/check/leagueBonusGold", headers=headers)
-                                    if res.status_code == 200 and res.json()['leagueBonusGold'] and self.checked[7] is False:
+                                    res = session.get(f"{API_GAME_ENDPOINT}/mining/task/check/leagueBonusGold",
+                                                      headers=headers)
+                                    if res.status_code == 200 and res.json()['leagueBonusGold'] and self.checked[
+                                        7] is False:
                                         self.checked[7] = True
                                         logger.success(f"{self.session_name} | <green>Upgraded to Gold league!</green>")
                                 if repaints >= 9:
-                                    res = session.get(f"{API_GAME_ENDPOINT}/mining/task/check/leagueBonusSilver", headers=headers)
-                                    if res.status_code == 200 and res.json()['leagueBonusSilver'] and self.checked[6] is False:
+                                    res = session.get(f"{API_GAME_ENDPOINT}/mining/task/check/leagueBonusSilver",
+                                                      headers=headers)
+                                    if res.status_code == 200 and res.json()['leagueBonusSilver'] and self.checked[
+                                        6] is False:
                                         self.checked[6] = True
-                                        logger.success(f"{self.session_name} | <green>Upgraded to Silver league!</green>")
+                                        logger.success(
+                                            f"{self.session_name} | <green>Upgraded to Silver league!</green>")
 
-                                res = session.get(f"{API_GAME_ENDPOINT}/mining/task/check/leagueBonusBronze", headers=headers)
-                                if res.status_code == 200 and res.json()['leagueBonusBronze'] and self.checked[5] is False:
+                                res = session.get(f"{API_GAME_ENDPOINT}/mining/task/check/leagueBonusBronze",
+                                                  headers=headers)
+                                if res.status_code == 200 and res.json()['leagueBonusBronze'] and self.checked[
+                                    5] is False:
                                     self.checked[5] = True
                                     logger.success(f"{self.session_name} | <green>Upgraded to Bronze league!</green>")
 
@@ -708,9 +739,9 @@ class Tapper:
                         else:
                             logger.warning(f"{self.session_name} | <yellow>Failed to get user data!</yellow>")
 
-
                 if self.multi_thread:
-                    sleep_ = randint(settings.SLEEP_TIME_BETWEEN_EACH_ROUND[0], settings.SLEEP_TIME_BETWEEN_EACH_ROUND[1])
+                    sleep_ = randint(settings.SLEEP_TIME_BETWEEN_EACH_ROUND[0],
+                                     settings.SLEEP_TIME_BETWEEN_EACH_ROUND[1])
                     logger.info(f"{self.session_name} | Sleep {sleep_}s...")
                     await asyncio.sleep(sleep_)
                 else:
@@ -724,6 +755,8 @@ class Tapper:
                 traceback.print_exc()
                 logger.error(f"{self.session_name} | Unknown error: {error}")
                 await asyncio.sleep(delay=randint(60, 120))
+
+
 async def run_tapper(tg_client: Client, proxy: str | None):
     try:
         sleep_ = randint(1, 15)
