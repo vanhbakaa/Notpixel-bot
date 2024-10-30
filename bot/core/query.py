@@ -1,6 +1,5 @@
 import asyncio
 import random
-import sys
 from itertools import cycle
 from urllib.parse import unquote
 
@@ -451,17 +450,28 @@ class Tapper:
 
         try:
             logger.info(f"{self.session_name} | Downloading image from server...")
-            res = session.get(url, headers=image_headers)
+            if "https://fra1.digitaloceanspaces.com/" in url:
+                response = requests.get(url, stream=True)
+                if response.status_code == 200:
+                    with open(image_filename, "wb") as file:
+                        for chunk in response.iter_content(1024):
+                            file.write(chunk)
 
-            if res.status_code == 200:
-                img_data = res.content
-                img = Image.open(io.BytesIO(img_data))
-
-                img.save(image_filename)
+                img = Image.open(image_filename)
+                img.load()
                 return img
             else:
-                print(res.text)
-                raise Exception(f"Failed to download image from {url}, status: {res.status_code}")
+                res = session.get(url, headers=image_headers)
+
+                if res.status_code == 200:
+                    img_data = res.content
+                    img = Image.open(io.BytesIO(img_data))
+
+                    img.save(image_filename)
+                    return img
+                else:
+                    print(res.text)
+                    raise Exception(f"Failed to download image from {url}, status: {res.status_code}")
         except Exception as e:
             # traceback.print_exc()
             logger.error(f"{self.session_name} | Error while loading image from url: {url} | Error: {e}")
@@ -574,7 +584,7 @@ class Tapper:
                                                 'image': template_image,
                                             }
                                     if not self.default_template['image']:
-                                        image_url = 'https://app.notpx.app/assets/dungeon_4-B7Qp6JGr.png'
+                                        image_url = 'https://app.notpx.app/assets/halloween-DrqzeAH-.png'
                                         image_headers = headers.copy()
                                         image_headers['Referer'] = 'https://app.notpx.app/'
                                         self.default_template['image'] = await self.get_image(session, image_url,
