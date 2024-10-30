@@ -154,10 +154,10 @@ You can also use arguments for quick start, for example:
 python3 -m venv venv
 source venv/bin/activate
 pip3 install -r requirements.txt
-cp .env-example .env
+cp .env-example .env #Also Add bot token from @botfather
 nano .env
 npm install
-node index.js
+node index.js #Then /start the bot created in @botfather
 ```
 
 # Support This Project
