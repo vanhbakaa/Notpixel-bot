@@ -531,8 +531,6 @@ class Tapper:
             logger.info(f"{self.session_name} | Downloading image from server...")
             if "https://fra1.digitaloceanspaces.com/" in url:
                 response = requests.get(url, stream=True)
-
-                # Check if the request was successful
                 if response.status_code == 200:
                     with open(image_filename, "wb") as file:
                         for chunk in response.iter_content(1024):
@@ -666,7 +664,7 @@ class Tapper:
                                                 'image': template_image,
                                             }
                                     if not self.default_template['image']:
-                                        image_url = 'https://app.notpx.app/assets/dungeon_2-Di8XeQU7.png'
+                                        image_url = 'https://app.notpx.app/assets/halloween-DrqzeAH-.png'
                                         image_headers = headers.copy()
                                         image_headers['Referer'] = 'https://app.notpx.app/'
                                         self.default_template['image'] = await self.get_image(session, image_url,
