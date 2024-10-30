@@ -537,6 +537,10 @@ class Tapper:
                     with open(image_filename, "wb") as file:
                         for chunk in response.iter_content(1024):
                             file.write(chunk)
+
+                img = Image.open(image_filename)
+                img.load()
+                return img
             else:
                 res = session.get(url, headers=image_headers)
 
