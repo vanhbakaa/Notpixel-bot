@@ -30,6 +30,9 @@ class Settings(BaseSettings):
     ADVANCED_ANTI_DETECTION: bool = False
 
     USE_PROXY_FROM_FILE: bool = False
+    BOT_TOKEN: str = ""
+
+
 
 
 settings = Settings()
