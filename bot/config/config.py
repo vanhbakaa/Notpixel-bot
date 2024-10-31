@@ -33,6 +33,8 @@ class Settings(BaseSettings):
 
     USE_PROXY_FROM_FILE: bool = False
 
+    BOT_TOKEN: str = ""
+
 
 settings = Settings()
 
