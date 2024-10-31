@@ -59,7 +59,6 @@ class Tapper:
         self.balace = 0
         self.maxtime = 0
         self.fromstart = 0
-        self.checked = [False] * 9
         self.balance = 0
         self.color_list = ["#FFD635", "#7EED56", "#00CCC0", "#51E9F4", "#94B3FF", "#000000", "#898D90", "#E46E6E",
                            "#E4ABFF", "#FF99AA", "#FFB470", "#FFFFFF", "#BE0039", "#FF9600", "#00CC78", "#009EAA",
@@ -91,6 +90,7 @@ class Tapper:
         }
         self.user_upgrades = None
         self.template_to_join = 0
+        self.completed_task = None
 
     async def get_tg_web_data(self, proxy: str | None) -> str:
         try:
@@ -223,7 +223,7 @@ class Tapper:
                     f"{self.session_name} | <green>Painted <cyan>{data[1]}</cyan> successfully new color: <cyan>{data1[0]}</cyan> | Earned <light-blue>{int(response.json()['balance']) - self.balance}</light-blue> | Balace: <light-blue>{response.json()['balance']}</light-blue> | Repaint left: <yellow>{chance_left}</yellow></green>")
                 self.balance = int(response.json()['balance'])
         else:
-            print(response.text)
+            # print(response.text)
             logger.warning(f"{self.session_name} | Faled to repaint: {response.status_code}")
 
     async def auto_upgrade_paint(self, session):
@@ -556,6 +556,42 @@ class Tapper:
             logger.error(f"{self.session_name} | Error while loading image from url: {url} | Error: {e}")
             return None
 
+    async def use_pumpkin(self, session):
+        user_data = self.get_user_data(session)
+        self.balance = int(user_data['userBalance'])
+        if user_data is None:
+            return
+
+        pumpkin = user_data.get('goods')
+        if "7" in pumpkin.keys():
+            total_bombs = pumpkin["7"]
+            logger.info(f"{self.session_name} | Total bomb: <yellow>{total_bombs}</yellow>")
+
+        else:
+            logger.info(f"{self.session_name} | No bomb left, switch to normal paint")
+            return
+
+        for _ in range(total_bombs):
+            try:
+                pos = self.generate_random_pos()
+                res = session.post('https://notpx.app/api/v1/repaint/special',
+                                                       json={"pixelId": int(pos), "type": 7}, headers=headers)
+                res.raise_for_status()
+                cur_balance = self.balance + 196
+                change = cur_balance - self.balance
+                if change <= 0:
+                    change = 0
+                self.balance = cur_balance
+                logger.success(
+                    f"{self.session_name} | <green> Painted <cyan>{pos}</cyan> with <cyan>Pumkin bomb</cyan>! | got <red>{change:.1f}</red> px | Balance: <cyan>{self.balance}</cyan> px </green>")
+                await asyncio.sleep(randint(2,5))
+            except:
+                traceback.print_exc()
+                logger.warning(f"{self.session_name} | <yellow>Nothing left to paint!</yellow>")
+                return
+
+
+
     async def run(self, proxy: str | None) -> None:
         access_token_created_time = 0
         proxy_conn = ProxyConnector().from_url(proxy) if proxy else None
@@ -624,6 +660,9 @@ class Tapper:
                             logger.info(
                                 f"{self.session_name} | Pixel Balance: <light-blue>{int(user['userBalance'])}</light-blue> | Pixel available to paint: <cyan>{user['charges']}</cyan> | User league: <yellow>{user_league}</yellow>")
 
+                            if settings.USE_PUMPKIN_BOMBS:
+                                await self.use_pumpkin(session)
+
                             if user['charges'] > 0:
                                 if settings.USE_RANDOM_TEMPLATES:
                                     self.template_id = random.choice(settings.RANDOM_TEMPLATES_ID)
@@ -681,52 +720,56 @@ class Tapper:
                                 self.claimpx(session)
                                 await asyncio.sleep(random.uniform(2, 5))
                             if settings.AUTO_TASK:
-                                res = session.get(f"{API_GAME_ENDPOINT}/mining/task/check/x?name=notpixel",
-                                                  headers=headers)
-                                if res.status_code == 200 and res.json()['x:notpixel'] and self.checked[1] is False:
-                                    self.checked[1] = True
-                                    logger.success("<green>Task Not pixel on x completed!</green>")
-                                res = session.get(f"{API_GAME_ENDPOINT}/mining/task/check/x?name=notcoin",
-                                                  headers=headers)
-                                if res.status_code == 200 and res.json()['x:notcoin'] and self.checked[2] is False:
-                                    self.checked[2] = True
-                                    logger.success("<green>Task Not coin on x completed!</green>")
-                                res = session.get(f"{API_GAME_ENDPOINT}/mining/task/check/paint20pixels",
-                                                  headers=headers)
-                                if res.status_code == 200 and res.json()['paint20pixels'] and self.checked[3] is False:
-                                    self.checked[3] = True
-                                    logger.success("<green>Task paint 20 pixels completed!</green>")
+                                user_data = self.get_user_data(session)
+                                self.completed_task = list(user_data['tasks'].keys())
+                                if "pumpkin" not in self.completed_task :
+                                    res = session.get(f"{API_GAME_ENDPOINT}/mining/task/check/pumpkin", headers=headers)
+                                    if res.status_code == 200 and res.json()['pumpkin']:
+                                        logger.success(f"{self.session_name} | <green>Successfully claimed pumpkin!</green>")
 
-                                if repaints >= 2049:
+                                if "x:notpixel" not in self.completed_task:
+                                    res = session.get(f"{API_GAME_ENDPOINT}/mining/task/check/x?name=notpixel",
+                                                      headers=headers)
+                                    if res.status_code == 200 and res.json()['x:notpixel']:
+                                        logger.success("<green>Task Not pixel on x completed!</green>")
+
+                                if "x:notcoin" not in self.completed_task:
+                                    res = session.get(f"{API_GAME_ENDPOINT}/mining/task/check/x?name=notcoin",
+                                                      headers=headers)
+                                    if res.status_code == 200 and res.json()['x:notcoin']:
+                                        logger.success("<green>Task Not coin on x completed!</green>")
+
+                                if "paint20pixels" not in self.completed_task:
+                                    res = session.get(f"{API_GAME_ENDPOINT}/mining/task/check/paint20pixels",
+                                                      headers=headers)
+                                    if res.status_code == 200 and res.json()['paint20pixels']:
+                                        logger.success("<green>Task paint 20 pixels completed!</green>")
+
+                                if repaints >= 2049 and "leagueBonusPlatinum" not in self.completed_task:
                                     res = session.get(f"{API_GAME_ENDPOINT}/mining/task/check/leagueBonusPlatinum",
                                                       headers=headers)
-                                    if res.status_code == 200 and res.json()['leagueBonusPlatinum'] and self.checked[
-                                        8] is False:
-                                        self.checked[8] = True
+                                    if res.status_code == 200 and res.json()['leagueBonusPlatinum']:
                                         logger.success(
                                             f"{self.session_name} | <green>Upgraded to Plantium league!</green>")
-                                if repaints >= 129:
+                                if repaints >= 129 and "leagueBonusGold" not in self.completed_task:
                                     res = session.get(f"{API_GAME_ENDPOINT}/mining/task/check/leagueBonusGold",
                                                       headers=headers)
-                                    if res.status_code == 200 and res.json()['leagueBonusGold'] and self.checked[
-                                        7] is False:
-                                        self.checked[7] = True
+                                    if res.status_code == 200 and res.json()['leagueBonusGold']:
                                         logger.success(f"{self.session_name} | <green>Upgraded to Gold league!</green>")
-                                if repaints >= 9:
+                                if repaints >= 9 and "leagueBonusSilver" not in self.completed_task:
                                     res = session.get(f"{API_GAME_ENDPOINT}/mining/task/check/leagueBonusSilver",
                                                       headers=headers)
-                                    if res.status_code == 200 and res.json()['leagueBonusSilver'] and self.checked[
-                                        6] is False:
-                                        self.checked[6] = True
+                                    if res.status_code == 200 and res.json()['leagueBonusSilver']:
                                         logger.success(
                                             f"{self.session_name} | <green>Upgraded to Silver league!</green>")
 
-                                res = session.get(f"{API_GAME_ENDPOINT}/mining/task/check/leagueBonusBronze",
-                                                  headers=headers)
-                                if res.status_code == 200 and res.json()['leagueBonusBronze'] and self.checked[
-                                    5] is False:
-                                    self.checked[5] = True
-                                    logger.success(f"{self.session_name} | <green>Upgraded to Bronze league!</green>")
+                                if "leagueBonusBronze" not in self.completed_task:
+                                    res = session.get(f"{API_GAME_ENDPOINT}/mining/task/check/leagueBonusBronze",
+                                                      headers=headers)
+                                    if res.status_code == 200 and res.json()['leagueBonusBronze']:
+                                        logger.success(f"{self.session_name} | <green>Upgraded to Bronze league!</green>")
+
+
 
                             if settings.AUTO_UPGRADE_PAINT_REWARD:
                                 if self.is_max_lvl['paintReward'] is False:
