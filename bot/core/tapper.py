@@ -131,6 +131,10 @@ class Tapper:
                 except FloodWait as fl:
 
                     logger.warning(f"<light-yellow>{self.session_name}</light-yellow> | FloodWait {fl}")
+                    async for dialog in self.tg_client.get_dialogs():
+                        if dialog.chat and dialog.chat.username and dialog.chat.username == bot_peer:
+                            break
+
             web_view = await self.tg_client.invoke(RequestAppWebView(
                 peer=peer,
                 app=InputBotAppShortName(bot_id=peer, short_name="app"),
