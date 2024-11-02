@@ -126,7 +126,7 @@ class Tapper:
 
             while True:
                 try:
-                    peer = await self.tg_client.resolve_peer('notpx_bot')
+                    peer = await self.tg_client.resolve_peer('notpixel')
                     break
                 except FloodWait as fl:
 
