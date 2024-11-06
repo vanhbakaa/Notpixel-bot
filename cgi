@@ -1,1 +1,1 @@
-stoped for safety 
+stopped for safety 
