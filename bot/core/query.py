@@ -1,6 +1,7 @@
 import asyncio
 import random
 from itertools import cycle
+from urllib.parse import quote
 
 import aiohttp
 import cloudscraper
@@ -8,7 +9,7 @@ import requests
 from aiocfscrape import CloudflareScraper
 from aiohttp_proxy import ProxyConnector
 from better_proxy import Proxy
-from bot.core.agents import generate_random_user_agent
+from bot.core.agents import generate_random_user_agent, fetch_version
 from bot.config import settings
 from datetime import datetime, timedelta
 from tzlocal import get_localzone
@@ -85,6 +86,22 @@ class Tapper:
             return True
         except Exception as error:
             logger.error(f"{self.session_name} | Proxy: {proxy} | Error: {error}")
+            return False
+
+    async def anti_detect(self, http_client: aiohttp.ClientSession):
+        try:
+            payload = {
+                "d": "notpx.app",
+                "n": "pageview",
+                "r": "https://web.telegram.org/",
+                "u": f"https://app.notpx.app/#tgWebAppData={quote(self.query)}&tgWebAppVersion=7.10&tgWebAppPlatform=android&tgWebAppThemeParams=%7B%22bg_color%22%3A%22%23212121%22%2C%22text_color%22%3A%22%23ffffff%22%2C%22hint_color%22%3A%22%23aaaaaa%22%2C%22link_color%22%3A%22%238774e1%22%2C%22button_color%22%3A%22%238774e1%22%2C%22button_text_color%22%3A%22%23ffffff%22%2C%22secondary_bg_color%22%3A%22%230f0f0f%22%2C%22header_bg_color%22%3A%22%23212121%22%2C%22accent_text_color%22%3A%22%238774e1%22%2C%22section_bg_color%22%3A%22%23212121%22%2C%22section_header_text_color%22%3A%22%23aaaaaa%22%2C%22subtitle_text_color%22%3A%22%23aaaaaa%22%2C%22destructive_text_color%22%3A%22%23e53935%22%7D"
+            }
+            response = await http_client.post("https://plausible.joincommunity.xyz/api/event", json=payload)
+            if response.status == 202:
+                return True
+            else:
+                return False
+        except:
             return False
 
     def login(self, session):
@@ -511,6 +528,8 @@ class Tapper:
         proxy_conn = ProxyConnector().from_url(proxy) if proxy else None
 
         headers["User-Agent"] = generate_random_user_agent(device_type='android', browser_type='chrome')
+        chrome_ver = fetch_version(headers['User-Agent'])
+        headers['Sec-Ch-Ua'] = f'"Chromium";v="{chrome_ver}", "Android WebView";v="{chrome_ver}", "Not.A/Brand";v="99"'
         http_client = CloudflareScraper(headers=headers, connector=proxy_conn)
 
         session = cloudscraper.create_scraper()
@@ -560,6 +579,10 @@ class Tapper:
                         time_to_sleep = (end_time - current_time).total_seconds()
                         logger.info(f"{self.session_name} | Sleeping for {time_to_sleep} seconds until {end_time}.")
                         await asyncio.sleep(time_to_sleep)
+
+                    if await self.anti_detect(http_client) is False:
+                        await asyncio.sleep(15)
+                        continue
 
                     elif self.login(session):
                         user = self.get_user_data(session)
@@ -641,7 +664,7 @@ class Tapper:
                                     if res.status_code == 200 and res.json()['nikolai']:
                                         logger.success(
                                             f"{self.session_name} | <green>Successfully complete task <cyan>nikolai</cyan>!</green>")
-                                        
+
                                 if "pumpkin" not in self.completed_task:
                                     res = session.get(f"{API_GAME_ENDPOINT}/mining/task/check/pumpkin", headers=headers)
                                     if res.status_code == 200 and res.json()['pumpkin']:
