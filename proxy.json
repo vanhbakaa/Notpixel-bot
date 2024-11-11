@@ -1,0 +1,3 @@
+{
+    "session file name(session mode) or telegram username(query mode)": "type:user:pass@ip:port"
+}
