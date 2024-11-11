@@ -77,7 +77,7 @@ async def get_tg_clients() -> list[Client]:
 
 def fetch_username(query):
     try:
-        fetch_data = unquote(query).split("&user=")[1].split("&auth_date=")[0]
+        fetch_data = unquote(query).split("user=")[1].split("&auth_date=")[0]
         json_data = json.loads(fetch_data)
         return json_data['username']
     except:
