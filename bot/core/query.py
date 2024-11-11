@@ -37,7 +37,7 @@ API_GAME_ENDPOINT = "https://notpx.app/api/v1"
 class Tapper:
     def __init__(self, query: str, multi_thread):
         self.query = query
-        fetch_data = unquote(query).split("&user=")[1].split("&auth_date=")[0]
+        fetch_data = unquote(query).split("user=")[1].split("&auth_date=")[0]
         json_data = json.loads(fetch_data)
         self.session_name = json_data['username']
         self.first_name = ''
@@ -777,7 +777,7 @@ async def get_user_agent(session_name):
 
 def fetch_username(query):
     try:
-        fetch_data = unquote(query).split("&user=")[1].split("&auth_date=")[0]
+        fetch_data = unquote(query).split("user=")[1].split("&auth_date=")[0]
         json_data = json.loads(fetch_data)
         return json_data['username']
     except:
