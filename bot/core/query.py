@@ -1,7 +1,6 @@
 import asyncio
 import random
 import sys
-from itertools import cycle
 from urllib.parse import quote, unquote
 
 import aiohttp
@@ -30,6 +29,7 @@ import urllib3
 import json
 
 from ..utils.ps import check_base_url
+from bot.utils import launcher as lc
 
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
@@ -37,7 +37,7 @@ API_GAME_ENDPOINT = "https://notpx.app/api/v1"
 class Tapper:
     def __init__(self, query: str, multi_thread):
         self.query = query
-        fetch_data = unquote(query).split("user=")[1].split("&auth_date=")[0]
+        fetch_data = unquote(query).split("&user=")[1].split("&auth_date=")[0]
         json_data = json.loads(fetch_data)
         self.session_name = json_data['username']
         self.first_name = ''
@@ -784,13 +784,12 @@ def fetch_username(query):
         logger.warning(f"Invaild query: {query}")
         sys.exit()
 
-async def run_query_tapper1(querys: list[str], proxies):
-    proxies_cycle = cycle(proxies) if proxies else None
+async def run_query_tapper1(querys: list[str]):
 
     while True:
         for query in querys:
             try:
-                await Tapper(query=query,multi_thread=False).run(next(proxies_cycle) if proxies_cycle else None,
+                await Tapper(query=query,multi_thread=False).run(proxy=await lc.get_proxy(fetch_username(query)),
                                                                  ua=await get_user_agent(fetch_username(query)))
             except InvalidSession:
                 logger.error(f"Invalid Query: {query}")
