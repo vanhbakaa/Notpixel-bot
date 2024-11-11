@@ -24,7 +24,7 @@ from bot.core.image_checker import get_cords_and_color, template_to_join, inform
 from bot.utils import logger
 from bot.exceptions import InvalidSession
 from .headers import headers
-from random import randint, uniform
+from random import randint
 import urllib3
 import base64
 import os
@@ -34,6 +34,7 @@ import traceback
 from bot.utils.ps import check_base_url
 import sys
 import cloudscraper
+from bot.utils import launcher as lc
 
 
 def generate_websocket_key():
@@ -865,13 +866,12 @@ async def get_user_agent(session_name):
         logger.info(f"{session_name} | Loading user agent from cache...")
         return user_agents[session_name]
 
-async def run_tapper1(tg_clients: list[Client], proxies):
-    proxies_cycle = cycle(proxies) if proxies else None
+async def run_tapper1(tg_clients: list[Client]):
     while True:
         for tg_client in tg_clients:
             try:
                 await Tapper(tg_client=tg_client, multi_thread=False).run(
-                    next(proxies_cycle) if proxies_cycle else None, ua=await get_user_agent(tg_client.name))
+                    proxy=await lc.get_proxy(tg_client.name), ua=await get_user_agent(tg_client.name))
             except InvalidSession:
                 logger.error(f"{tg_client.name} | Invalid Session")
 
