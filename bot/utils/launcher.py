@@ -198,7 +198,7 @@ async def run_tasks_query(query_ids: list[str]):
     tasks = [
         asyncio.create_task(
             run_query_tapper(
-                query=query,
+                query=query, 
                 proxy=await get_proxy(fetch_username(query)),
                 ua=await get_user_agent(fetch_username(query))
             )
