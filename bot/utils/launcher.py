@@ -85,9 +85,13 @@ def fetch_username(query):
             json_data = json.loads(fetch_data)
             return json_data['username']
         except:
-            logger.warning(f"Invaild query: {query}")
-            sys.exit()
-
+            try:
+                fetch_data = unquote(unquote(query)).split("user=")[1].split("&auth_date=")[0]
+                json_data = json.loads(fetch_data)
+                return json_data['username']
+            except:
+                logger.warning(f"Invaild query: {query}")
+                sys.exit()
 
 async def get_user_agent(session_name):
     async with AIOFile('user_agents.json', 'r') as file:
