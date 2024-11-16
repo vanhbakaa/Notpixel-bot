@@ -16,7 +16,7 @@ apis = [
     "/mining/boost/check/",
     "/mining/task/check/"
 ]
-ls_pattern = re.compile(r'[a-zA-Z]+s\s*=\s*["\'](https?://[^\s"\']+)["\']')
+ls_pattern = re.compile(r'\b[a-zA-Z]+\s*=\s*["\'](https?://[^"\']+)["\']')
 e_get_pattern = re.compile(r'[a-zA-Z]\.get\(\s*["\']([^"\']+)["\']|\(\s*`([^`]+)`\s*\)')
 e_put_pattern = re.compile(r'[a-zA-Z]\.put\(\s*["\']([^"\']+)["\']|\(\s*`([^`]+)`\s*\)')
 
@@ -49,7 +49,7 @@ def get_base_api(url):
         response = requests.get(url)
         response.raise_for_status()
         content = response.text
-        match = ls_pattern.search(content)
+        match = ls_pattern.findall(content)
         e_get_urls = e_get_pattern.findall(content)
         e_put_urls = e_put_pattern.findall(content)
 
@@ -66,7 +66,8 @@ def get_base_api(url):
                 return None
 
         if match:
-            return match.group(1)
+            # print(match)
+            return match
         else:
             logger.info("Could not find 'api' in the content.")
             return None
