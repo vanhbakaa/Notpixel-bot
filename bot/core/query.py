@@ -37,7 +37,7 @@ API_GAME_ENDPOINT = "https://notpx.app/api/v1"
 class Tapper:
     def __init__(self, query: str, multi_thread):
         self.query = query
-                try:
+        try:
             fetch_data = unquote(self.query).split("user=")[1].split("&chat_instance=")[0]
         except:
             try:
