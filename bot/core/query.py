@@ -37,7 +37,7 @@ API_GAME_ENDPOINT = "https://notpx.app/api/v1"
 class Tapper:
     def __init__(self, query: str, multi_thread):
         self.query = query
-        try:
+                try:
             fetch_data = unquote(self.query).split("user=")[1].split("&chat_instance=")[0]
         except:
             try:
@@ -45,6 +45,11 @@ class Tapper:
             except:
                 logger.warning(f"Invaild query: {query}")
                 sys.exit()
+        #print(fetch_data)
+        try:
+            json_data = json.loads(fetch_data)
+        except:
+            fetch_data = unquote(fetch_data)
         json_data = json.loads(fetch_data)
         self.session_name = json_data['username']
         self.first_name = ''
