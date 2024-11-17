@@ -50,7 +50,7 @@ class Tapper:
                     json_data = json.loads(fetch_data)
                 except:
                     logger.warning(f"Invaild query: {query}")
-                    sys.exit()
+                    return
         json_data = json.loads(fetch_data)
         self.session_name = json_data['username']
         self.first_name = ''
