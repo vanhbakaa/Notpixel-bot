@@ -38,18 +38,19 @@ class Tapper:
     def __init__(self, query: str, multi_thread):
         self.query = query
         try:
-            fetch_data = unquote(self.query).split("user=")[1].split("&chat_instance=")[0]
-        except:
-            try:
-                fetch_data = unquote(self.query).split("user=")[1].split("&auth_date=")[0]
-            except:
-                logger.warning(f"Invaild query: {query}")
-                sys.exit()
-        #print(fetch_data)
-        try:
+            fetch_data = unquote(query).split("user=")[1].split("&chat_instance=")[0]
             json_data = json.loads(fetch_data)
         except:
-            fetch_data = unquote(fetch_data)
+            try:
+                fetch_data = unquote(query).split("user=")[1].split("&auth_date=")[0]
+                json_data = json.loads(fetch_data)
+            except:
+                try:
+                    fetch_data = unquote(unquote(query)).split("user=")[1].split("&auth_date=")[0]
+                    json_data = json.loads(fetch_data)
+                except:
+                    logger.warning(f"Invaild query: {query}")
+                    sys.exit()
         json_data = json.loads(fetch_data)
         self.session_name = json_data['username']
         self.first_name = ''
