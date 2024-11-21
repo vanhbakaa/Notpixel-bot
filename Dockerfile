@@ -1,4 +1,6 @@
-FROM python:3.11.5-alpine3.18
+FROM python:3.11.10-alpine3.20
+
+RUN apk add gcc musl-dev
 
 WORKDIR app/
 
