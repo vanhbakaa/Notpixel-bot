@@ -1,3 +1,5 @@
+import sys
+
 import requests
 import re
 
@@ -88,6 +90,7 @@ def check_base_url():
             version_c = js_ver.split(",")[1]
             if version != version_c:
                 logger.warning(f"<red>Detected danger change must update the bot for safety!</red>")
+                sys.exit()
             js_ver = js_ver.split(",")[0]
             for js in main_js_formats:
                 if js_ver in js:
