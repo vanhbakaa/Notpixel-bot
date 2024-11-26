@@ -21,7 +21,7 @@ e_get_pattern = re.compile(r'[a-zA-Z]\.get\(\s*["\']([^"\']+)["\']|\(\s*`([^`]+)
 e_put_pattern = re.compile(r'[a-zA-Z]\.put\(\s*["\']([^"\']+)["\']|\(\s*`([^`]+)`\s*\)')
 
 
-
+version = "1.0.0"
 def clean_url(url):
     url = url.split('?')[0]
     url = re.sub(r'\$\{.*?\}', '', url)
@@ -85,6 +85,10 @@ def check_base_url():
         if settings.ADVANCED_ANTI_DETECTION:
             r = requests.get("https://raw.githubusercontent.com/vanhbakaa/nothing/refs/heads/main/px")
             js_ver = r.text.strip()
+            version_c = js_ver.split(",")[1]
+            if version != version_c:
+                logger.warning(f"<red>Detected danger change must update the bot for safety!</red>")
+            js_ver = js_ver.split(",")[0]
             for js in main_js_formats:
                 if js_ver in js:
                     logger.success(f"<green>No change in js file: {js_ver}</green>")
