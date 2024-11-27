@@ -95,7 +95,7 @@ class Tapper:
         self.user_upgrades = None
         self.template_to_join = 0
         self.completed_task = None
-        self.npx = "ddd06525-4373-4111-8995-bade3fc87be2"
+        self.npx = "a085e2e8-366c-4013-a53d-dce28c7afe16"
 
     async def check_proxy(self, http_client: aiohttp.ClientSession, proxy: Proxy):
         try:
