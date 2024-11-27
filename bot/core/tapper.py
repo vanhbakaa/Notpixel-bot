@@ -94,7 +94,7 @@ class Tapper:
         self.template_to_join = 0
         self.completed_task = None
         self.query_anti = None
-        self.npx = "ddd06525-4373-4111-8995-bade3fc87be2"
+        self.npx = "a085e2e8-366c-4013-a53d-dce28c7afe16"
 
     async def get_tg_web_data(self, proxy: str | None) -> str:
         try:
