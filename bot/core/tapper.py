@@ -279,9 +279,9 @@ class Tapper:
             logger.success(f"{self.session_name} | <green>Upgrade energy limit successfully!</green>")
 
     def claimpx(self, session):
-        claim_headers = headers.copy()
-        claim_headers.update({"Npx": self.npx})
-        res = session.get(f"{API_GAME_ENDPOINT}/mining/claim", headers=claim_headers)
+        # claim_headers = headers.copy()
+        # claim_headers.update({"Npx": self.npx})
+        res = session.get(f"{API_GAME_ENDPOINT}/mining/claim", headers=headers)
         if res.status_code == 200:
             logger.success(
                 f"{self.session_name} | Successfully claimed <cyan>{res.json()['claimed']}</cyan> px from mining!")
