@@ -23,7 +23,7 @@ e_get_pattern = re.compile(r'[a-zA-Z]\.get\(\s*["\']([^"\']+)["\']|\(\s*`([^`]+)
 e_put_pattern = re.compile(r'[a-zA-Z]\.put\(\s*["\']([^"\']+)["\']|\(\s*`([^`]+)`\s*\)')
 
 
-version = "1.0.2"
+version = "1.0.3"
 def clean_url(url):
     url = url.split('?')[0]
     url = re.sub(r'\$\{.*?\}', '', url)
